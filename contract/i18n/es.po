@@ -295,12 +295,12 @@ msgstr "<strong>Empresa:</strong>"
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.report_contract_document
 msgid "<strong>Price</strong>"
-msgstr "<strong>Precio</strong>"
+msgstr "<strong>Importe</strong>"
 
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.report_contract_document
 msgid "<strong>Quantity</strong>"
-msgstr "<strong>Cantidad</strong>"
+msgstr "<strong>Cant.</strong>"
 
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.report_contract_document
@@ -330,7 +330,7 @@ msgstr "<strong>Total</strong>"
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.report_contract_document
 msgid "<strong>Unit Price</strong>"
-msgstr "<strong>Precio unidad</strong>"
+msgstr "<strong>P.Unit.</strong>"
 
 #. module: contract
 #: code:addons/contract/models/contract_line.py:0
@@ -2214,7 +2214,7 @@ msgstr "Actualizar detalles de terminación"
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.report_contract_document
 msgid "VAT:"
-msgstr "NIF:"
+msgstr "RUC/DNI:"
 
 #. module: contract
 #: model_terms:ir.ui.view,arch_db:contract.contract_line_wizard_plan_successor_form_view

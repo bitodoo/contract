@@ -28,6 +28,7 @@
         "report/report_contract.xml",
         "report/contract_views.xml",
         "data/contract_cron.xml",
+        "data/ir_sequence.xml",
         "data/contract_renew_cron.xml",
         "data/mail_template.xml",
         "data/template_mail_notification.xml",
@@ -46,6 +47,7 @@
         "views/res_config_settings.xml",
         "views/contract_terminate_reason.xml",
         "views/contract_portal_templates.xml",
+        'views/account_move_view.xml',
     ],
     "assets": {
         "web.assets_backend": [

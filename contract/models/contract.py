@@ -6,7 +6,9 @@
 # Copyright 2018 ACSONE SA/NV
 # Copyright 2021 Tecnativa - Víctor Martínez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+from ast import Store
 import logging
+import json
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -135,6 +137,84 @@ class ContractContract(models.Model):
         inverse_name="contract_id",
         string="Modifications",
     )
+    mobile = fields.Char(
+        related="partner_id.mobile"
+    )
+    website = fields.Char(
+        related="partner_id.website"
+    )
+
+
+
+    amount_untaxed = fields.Monetary(
+        string='Untaxed Amount',
+        store=True, compute='_amount_all',
+        tracking=5
+    )
+    tax_totals_json = fields.Char(
+        compute='_compute_tax_totals_json'
+    )
+    amount_tax = fields.Monetary(
+        string='Taxes',
+        store=True,
+        compute='_amount_all'
+        )
+    amount_total = fields.Monetary(
+        string='Total',
+        store=True,
+        compute='_amount_all',
+        tracking=4
+    )
+    comission = fields.Monetary(
+        string='Comisión',
+        tracking=4,
+    )
+    utility = fields.Monetary(
+        string='Utilidad',
+        tracking=4,
+        store=True,
+        compute='_compute_utility',
+    )
+
+    @api.depends('amount_total', 'comission')
+    def _compute_utility(self):
+        for order in self:
+            order.update({
+                'utility': order.amount_total - order.comission,
+            })
+
+    @api.depends('contract_line_fixed_ids.tax_id', 'contract_line_fixed_ids.price_unit', 'amount_total', 'amount_untaxed')
+    def _compute_tax_totals_json(self):
+        def compute_taxes(order_line):
+            price = order_line.price_unit * (1 - (order_line.discount or 0.0) / 100.0)
+            order = order_line.contract_id
+            return order_line.tax_id._origin.compute_all(price, order.pricelist_id.currency_id, order_line.quantity, product=order_line.product_id, partner=order.partner_id)
+
+        account_move = self.env['account.move']
+        for order in self:
+            tax_lines_data = account_move._prepare_tax_lines_data_for_totals_from_object(order.contract_line_fixed_ids, compute_taxes)
+            tax_totals = account_move._get_tax_totals(order.partner_id, tax_lines_data, order.amount_total, order.amount_untaxed, order.pricelist_id.currency_id)
+            order.tax_totals_json = json.dumps(tax_totals)
+
+
+    @api.depends('contract_line_fixed_ids.price_total')
+    def _amount_all(self):
+        """
+        Compute the total amounts of the SO.
+        """
+        for order in self:
+            amount_untaxed = amount_tax = 0.0
+            for line in order.contract_line_fixed_ids:
+                amount_untaxed += line.price_subtotal
+                amount_tax += line.price_tax
+            order.update({
+                'amount_untaxed': amount_untaxed,
+                'amount_tax': amount_tax,
+                'amount_total': amount_untaxed + amount_tax,
+            })
+
+
+
 
     def get_formview_id(self, access_uid=None):
         if self.contract_type == "sale":
@@ -453,6 +533,9 @@ class ContractContract(models.Model):
                 "invoice_date": date_invoice,
                 "journal_id": journal.id,
                 "invoice_origin": self.name,
+                "comission": self.comission,
+                "invoice_user_id": self.user_id,
+                "contract_id": self.id,
             }
         )
         return invoice_vals, move_form
@@ -711,3 +794,10 @@ class ContractContract(models.Model):
                 "terminate_date": False,
             }
         )
+    
+    @api.model
+    def create(self, vals):
+        seq = self.env["ir.sequence"].next_by_code("sequence_contract") or 0
+        vals["name"] = seq
+        return super(ContractContract, self).create(vals)
+

@@ -24,11 +24,12 @@
                                 <strong>Responsible: </strong>
                                 <p t-field="o.user_id" />
                                 <strong>Contract: </strong>
-                                <p t-field="o.code" />
+                                <p t-field="o.name" />
                             </div>
                         </div>
                         <div class="row" id="invoice_info">
                             <t t-set="total" t-value="0" />
+                            <t t-set="igv" t-value="0" />
                             <div class="col-12">
                                 <p id="services_info">
                                     <strong>Recurring Items</strong>
@@ -40,6 +41,9 @@
                                                 <strong>Description</strong>
                                             </th>
                                             <th class="text-right">
+                                                <strong>Date Start</strong>
+                                            </th>
+                                            <th class="text-right">
                                                 <strong>Quantity</strong>
                                             </th>
                                             <th class="text-right">
@@ -47,9 +51,6 @@
                                             </th>
                                             <th class="text-right">
                                                 <strong>Price</strong>
-                                            </th>
-                                            <th class="text-right">
-                                                <strong>Date Start</strong>
                                             </th>
                                         </tr>
                                     </thead>
@@ -67,6 +68,9 @@
                                                     <td>
                                                         <span t-field="l.name" />
                                                     </td>
+                                                     <td class="text-right">
+                                                        <span t-field="l.date_start" />
+                                                    </td>
                                                     <td class="text-right">
                                                         <span t-field="l.quantity" />
                                                     </td>
@@ -78,16 +82,18 @@
                                                     </td>
                                                     <td class="text-right">
                                                         <span
-                                                            t-field="l.price_subtotal"
+                                                            t-field="l.price_total"
                                                             t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                                         />
                                                     </td>
-                                                    <td class="text-right">
-                                                        <span t-field="l.date_start" />
-                                                    </td>
+                                                   
                                                     <t
                                                         t-set="total"
-                                                        t-value="total + l.price_subtotal"
+                                                        t-value="total + l.price_total"
+                                                    />
+                                                    <t
+                                                        t-set="igv"
+                                                        t-value="igv + l.price_tax"
                                                     />
                                                 </t>
                                                 <t
@@ -125,6 +131,7 @@
                                                         />
                                                     </td>
                                                 </tr>
+                                                
                                             </t>
                                         </t>
                                     </tbody>
@@ -175,6 +182,25 @@
                                 </table>
                             </div>
                         </div>
+
+                        <div id="igv" class="row" name="igv">
+                            <div class="col-4 ml-auto">
+                                <table class="table">
+                                    <tr class="border-black o_subtotal" style="">
+                                        <td>
+                                            <strong>IGV</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <span
+                                                t-esc="igv"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'
+                                            />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
                         <div id="total" class="row" name="total">
                             <div class="col-4 ml-auto">
                                 <table class="table table-sm">

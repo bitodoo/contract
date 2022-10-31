@@ -36,16 +36,43 @@ class ContractAbstractContractLine(models.AbstractModel):
         "able to introduce a manual price",
     )
     specific_price = fields.Float()
+
     price_unit = fields.Float(
         string="Unit Price",
         compute="_compute_price_unit",
         inverse="_inverse_price_unit",
     )
+    # price_subtotal = fields.Float(
+    #     compute="_compute_price_subtotal",
+    #     digits="Account",
+    #     string="Sub Total",
+    # )
+
+
     price_subtotal = fields.Float(
-        compute="_compute_price_subtotal",
-        digits="Account",
-        string="Sub Total",
+        compute='_compute_amount',
+        string='Subtotal',
+        store=True
     )
+    price_tax = fields.Float(
+        compute='_compute_amount',
+        string='Total Tax',
+        store=True
+    )
+    price_total = fields.Float(
+        compute='_compute_amount',
+        string='Total',
+        store=True
+    )
+    tax_id = fields.Many2many(
+        comodel_name='account.tax',
+        string='Taxes',
+        context={'active_test': False}
+    )
+
+
+
+
     discount = fields.Float(
         string="Discount (%)",
         digits="Discount",
@@ -135,6 +162,21 @@ class ContractAbstractContractLine(models.AbstractModel):
     )
     is_recurring_note = fields.Boolean(compute="_compute_is_recurring_note")
     company_id = fields.Many2one(related="contract_id.company_id", store=True)
+
+    @api.depends('uom_id', 'discount', 'price_unit', 'tax_id')
+    def _compute_amount(self):
+        """
+        Compute the amounts of the SO line.
+        """
+        for line in self:
+            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            taxes = line.tax_id.compute_all(price, line.contract_id.pricelist_id.currency_id, line.quantity, product=line.product_id, partner=line.contract_id.partner_id)
+            line.update({
+                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
+                'price_total': taxes['total_included'],
+                'price_subtotal': taxes['total_excluded'],
+            })
+
 
     def _set_recurrence_field(self, field):
         """Helper method for computed methods that gets the equivalent field

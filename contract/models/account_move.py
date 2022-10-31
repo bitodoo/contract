@@ -3,7 +3,7 @@
 # Copyright 2020 Tecnativa - Pedro M. Baeza
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class AccountMove(models.Model):
@@ -11,6 +11,27 @@ class AccountMove(models.Model):
 
     # We keep this field for migration purpose
     old_contract_id = fields.Many2one("contract.contract")
+    contract_id = fields.Many2one("contract.contract", string="Contrato")
+    comission = fields.Monetary(
+        string='Comisión',
+        tracking=4,
+        readonly=True
+    )
+    utility = fields.Monetary(
+        string='Utilidad',
+        tracking=4,
+        store=True,
+        compute='_compute_utility',
+    )
+    website = fields.Char(related="partner_id.website")
+    mobile = fields.Char(related="partner_id.mobile")
+
+    @api.depends('amount_total', 'comission')
+    def _compute_utility(self):
+        for order in self:
+            order.update({
+                'utility': order.amount_total - order.comission,
+            })
 
 
 class AccountMoveLine(models.Model):

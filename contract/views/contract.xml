@@ -103,10 +103,20 @@
                         </h3>
                     </div>
                     <group name="main">
-                        <group>
+                        <group string="Datos Cliente">
                             <field name="commercial_partner_id" invisible="1" />
                             <field
                                 name="partner_id"
+                                required="1"
+                                attrs="{'readonly': [('is_terminated','=',True)]}"
+                            />
+                            <field
+                                name="website"
+                                required="1"
+                                attrs="{'readonly': [('is_terminated','=',True)]}"
+                            />
+                            <field
+                                name="mobile"
                                 required="1"
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
                             />
@@ -118,12 +128,9 @@
                                 name="payment_term_id"
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
                             />
-                            <field
-                                name="user_id"
-                                attrs="{'readonly': [('is_terminated','=',True)]}"
-                            />
+                           
                         </group>
-                        <group>
+                        <group string="Otros Datos">
                             <field
                                 name="contract_template_id"
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
@@ -134,6 +141,7 @@
                             <field
                                 name="fiscal_position_id"
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
+                                invisible="1"
                             />
                             <field
                                 name="journal_id"
@@ -147,7 +155,15 @@
                             />
                         </group>
                     </group>
-                    <group name="recurring_invoices">
+                    <group>
+                        <group string="Datos Responsable">
+                            <field
+                                    name="user_id"
+                                    attrs="{'readonly': [('is_terminated','=',True)]}"
+                                />
+                        </group>
+                    </group>
+                    <group name="recurring_invoices" string="Datos Recurrentes">
                         <field name="line_recurrence" class="oe_inline" />
                         <label for="line_recurrence" />
                         <group attrs="{'invisible': [('line_recurrence', '=', True)]}">
@@ -225,18 +241,32 @@
                                         groups="analytic.group_analytic_tags"
                                     />
                                     <field name="quantity" />
-                                    <field name="uom_id" />
+                                    <field name="uom_id" optional='hide'/>
                                     <field
                                         name="automatic_price"
                                         attrs="{'column_invisible': [('parent.contract_type', '=', 'purchase')]}"
+                                        optional='hide'
                                     />
                                     <field
                                         name="price_unit"
                                         attrs="{'readonly': [('automatic_price', '=', True)]}"
+                                        
                                     />
                                     <field name="specific_price" invisible="1" />
                                     <field name="discount" groups="base.group_no_one" />
+
+                                     <field
+                                        name="tax_id"
+                                        widget="many2many_tags"
+                                        options="{'no_create': True}"
+                                        domain="[('type_tax_use','=','sale')]"
+                                        context="{'active_test': True}"
+                                        optional="show"
+                                        string="Impuestos"
+                                    />
+
                                     <field name="price_subtotal" />
+                                    <field name="price_total" widget="monetary"/>
                                     <field name="recurring_interval" invisible="1" />
                                     <field name="recurring_rule_type" invisible="1" />
                                     <field
@@ -245,10 +275,11 @@
                                     />
                                     <field name="recurring_next_date" invisible="1" />
                                     <field name="date_start" invisible="1" />
-                                    <field name="date_end" />
+                                    <field name="date_end" optional='hide'/>
                                     <field
                                         name="last_date_invoiced"
                                         groups="base.group_no_one"
+                                        optional='hide'
                                     />
                                     <field
                                         name="create_invoice_visibility"
@@ -293,6 +324,19 @@
                                     />
                                 </tree>
                             </field>
+                             <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group colspan="4">
+                                    <field name="note" class="oe-bordered-editor" nolabel="1" placeholder="Terms and conditions..."/>
+                                </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="tax_totals_json" widget="account-tax-totals-field" nolabel="1" colspan="2"/>
+                                    <field name="comission" colspan="2"/>
+                                    <field name="utility" colspan="2"/>
+                                </group>
+                                
+                                <div class="oe_clear"/>
+                            </group>
+
                             <field
                                 name="contract_line_ids"
                                 attrs="{'readonly': [('is_terminated','=',True)], 'invisible': [('line_recurrence', '=', False)]}"
@@ -332,6 +376,7 @@
                                     <field
                                         name="automatic_price"
                                         attrs="{'column_invisible': [('parent.contract_type', '=', 'purchase')]}"
+                                        optional='hide'
                                     />
                                     <field
                                         name="price_unit"
@@ -340,6 +385,8 @@
                                     <field name="specific_price" invisible="1" />
                                     <field name="discount" groups="base.group_no_one" />
                                     <field name="price_subtotal" />
+                                    
+
                                     <field name="recurring_interval" invisible="1" />
                                     <field name="recurring_rule_type" invisible="1" />
                                     <field
@@ -347,11 +394,12 @@
                                         invisible="1"
                                     />
                                     <field name="date_start" required="1" />
-                                    <field name="date_end" />
+                                    <field name="date_end" optional='hide'/>
                                     <field name="recurring_next_date" required="1" />
                                     <field
                                         name="last_date_invoiced"
                                         groups="base.group_no_one"
+                                        optional='hide'
                                     />
                                     <field
                                         name="create_invoice_visibility"
@@ -536,16 +584,23 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" string="Name" />
-                <field name="code" />
-                <field name="journal_id" groups="account.group_account_user" />
+                <field name="user_id" />
                 <field name="partner_id" />
+                <field name="mobile"/>
+                <field name="recurring_interval" />
+                <field name="recurring_rule_type" />
+                <field name="journal_id" groups="account.group_account_user" />
                 <field
                     name="tag_ids"
                     widget="many2many_tags"
                     options="{'color_field': 'color'}"
                 />
-                <field name="active" invisible="1" />
+                <field name="website"/>
                 <field name="company_id" groups="base.group_multi_company" />
+                <field name="amount_total"/>
+                <field name="comission"/>
+                <field name="utility"/>
+                <field name="recurring_next_date"/>
             </tree>
         </field>
     </record>
