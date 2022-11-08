@@ -97,7 +97,6 @@
                             <field
                                 name="name"
                                 class="oe_inline"
-                                attrs="{'readonly': [('is_terminated','=',True)]}"
                                 placeholder="e.g. Contract XYZ"
                             />
                         </h3>
