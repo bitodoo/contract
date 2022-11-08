@@ -143,8 +143,7 @@ class ContractContract(models.Model):
     website = fields.Char(
         string="Website"
     )
-
-
+    commission_is_pay = fields.Boolean(string="comisión?", help=u"Recibo el pago de su cliente y solo transfiere a kaypi el total - la comisiòn")
 
     amount_untaxed = fields.Monetary(
         string='Untaxed Amount',
