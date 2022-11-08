@@ -25,6 +25,7 @@ class AccountMove(models.Model):
     )
     website = fields.Char(related="partner_id.website")
     mobile = fields.Char(related="partner_id.mobile")
+    is_nubefact = fields.Boolean(string="Nubefact?",related="contract_id.is_nubefact", store=True)
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):

@@ -14,6 +14,7 @@
                 <field name="website"/>
                 <field name="mobile"/>
                 <field name="contract_id"/>
+                <field name="is_nubefact"/>
             </field>
         </field>
     </record>
@@ -38,6 +39,7 @@
             </xpath>
             <xpath expr="//tree[1]/field[@name='name']" position="after">
                 <field name="contract_id" optional="show" />
+                <field name="is_nubefact" optional="show" />
             </xpath>
             <xpath expr="//tree[1]/field[@name='invoice_date_due']" position="attributes">
                 <attribute name="optional">hide</attribute>

@@ -175,6 +175,7 @@ class ContractContract(models.Model):
         store=True,
         compute='_compute_utility',
     )
+    is_nubefact = fields.Boolean(string="Nubefact?")
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):

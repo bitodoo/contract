@@ -149,6 +149,9 @@
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
                             />
                             <field
+                                name="is_nubefact"
+                            />
+                            <field
                                 name="tag_ids"
                                 widget="many2many_tags"
                                 options="{'color_field': 'color'}"
