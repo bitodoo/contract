@@ -141,7 +141,7 @@ class ContractContract(models.Model):
         related="partner_id.mobile"
     )
     website = fields.Char(
-        related="partner_id.website"
+        string="Website"
     )
 
 
