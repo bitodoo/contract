@@ -23,7 +23,7 @@ class AccountMove(models.Model):
         store=True,
         compute='_compute_utility',
     )
-    website = fields.Char(related="partner_id.website")
+    website = fields.Char(related="contract_id.website")
     mobile = fields.Char(related="partner_id.mobile")
     is_nubefact = fields.Boolean(string="Nubefact?",related="contract_id.is_nubefact", store=True)
 
