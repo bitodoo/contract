@@ -524,6 +524,9 @@ class ContractContract(models.Model):
             move_form.fiscal_position_id = self.fiscal_position_id
         if invoice_type == "out_invoice" and self.user_id:
             move_form.invoice_user_id = self.user_id
+        # Depende del modulo l10n_latam_invoice_document que crea el campo l10n_latam_document_type_id
+        if hasattr(self.journal_id, 'l10n_latam_document_type_id'):
+            move_form.l10n_latam_document_type_id = self.journal_id.l10n_latam_document_type_id
         invoice_vals = move_form._values_to_save(all_fields=True)
         invoice_vals.update(
             {
