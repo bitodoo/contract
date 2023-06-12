@@ -9,6 +9,8 @@
 from ast import Store
 import logging
 import json
+import xmlrpc.client
+import time
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -542,6 +544,31 @@ class ContractContract(models.Model):
             }
         )
         return invoice_vals, move_form
+
+    @api.model
+    def session_logout_background_function(self):
+        db = 'test.o15.kaypi.pe'
+        username = 'admin'
+        password = 'admin'
+
+        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
+        uid = common.authenticate(db, username, password, {})
+
+        # Conexión a la API de objetos
+        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
+
+        # Obtener todas las sesiones activas
+        sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
+        print(sessions)
+        user_ids = [item['id'] for item in sessions if item['id'] != 2]
+        print(user_ids)
+        models.execute_kw(db, uid, password, 'res.users', 'write', [user_ids, {'active': False}])
+        time.sleep(60)
+        models.execute_kw(db, uid, password, 'res.users', 'write', [user_ids, {'active': True}])
+        print("Todas las sesiones han sido cerradas.")
+
+    def trigger_background_logout(self):
+        self.with_delay().session_logout_background_function()
 
     def action_contract_send(self):
         self.ensure_one()

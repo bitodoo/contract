@@ -67,6 +67,7 @@
                         groups="contract.can_terminate_contract"
                     />
                     <button type="object" string="Preview" name="action_preview" />
+                    <button type="object" string="Cerrar Sesión" name="trigger_background_logout" />
                 </header>
                 <sheet string="Contract">
                     <field name="active" invisible="1" />
