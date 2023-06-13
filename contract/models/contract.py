@@ -9,8 +9,6 @@
 from ast import Store
 import logging
 import json
-import xmlrpc.client
-import time
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -178,6 +176,11 @@ class ContractContract(models.Model):
     )
     is_nubefact = fields.Boolean(string="Nubefact?")
     server_id = fields.Many2one('ka.server', string="Servidor")
+    server_active = fields.Boolean(related="server_id.server_active")
+
+    @api.onchange('server_id')
+    def onchange_server_id(self):
+        self.website = self.server_id.website
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):
@@ -546,33 +549,11 @@ class ContractContract(models.Model):
         )
         return invoice_vals, move_form
 
-    @api.model
-    def session_logout_background_function(self):
-        db = self.server_id.db
-        username = self.server_id.username_admin
-        password = self.server_id.password_admin
-
-        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
-        uid = common.authenticate(db, username, password, {})
-
-        # Conexión a la API de objetos
-        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
-
-        # Obtener todas las sesiones activas
-        sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
-        print(sessions)
-        user_ids = [item['id'] for item in sessions if item['id'] != 2]
-        print(user_ids)
-        for user_id in user_ids:
-            models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': False}])
-        # Tiempo suficiente para que se cierre la session de los clientes
-        time.sleep(60)
-        for user_id in user_ids:
-            models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': True}])
-        print("Todas las sesiones han sido cerradas.")
-
     def trigger_background_logout(self):
-        self.with_delay().session_logout_background_function()
+        self.server_id.with_delay().session_logout_background_function()
+
+    def action_server_active(self):
+        self.server_id.action_server_active()
 
     def action_contract_send(self):
         self.ensure_one()

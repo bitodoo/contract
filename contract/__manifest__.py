@@ -48,6 +48,7 @@
         "views/contract_terminate_reason.xml",
         "views/contract_portal_templates.xml",
         'views/account_move_view.xml',
+        'views/server_views.xml',
     ],
     "assets": {
         "web.assets_backend": [
