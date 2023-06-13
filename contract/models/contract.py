@@ -177,6 +177,7 @@ class ContractContract(models.Model):
         compute='_compute_utility',
     )
     is_nubefact = fields.Boolean(string="Nubefact?")
+    server_id = fields.Many2one('ka.server', string="Servidor")
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):
@@ -547,9 +548,9 @@ class ContractContract(models.Model):
 
     @api.model
     def session_logout_background_function(self):
-        db = 'test.o15.kaypi.pe'
-        username = 'admin'
-        password = 'admin'
+        db = self.server_id.db
+        username = self.server_id.username_admin
+        password = self.server_id.password_admin
 
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
         uid = common.authenticate(db, username, password, {})
@@ -562,9 +563,12 @@ class ContractContract(models.Model):
         print(sessions)
         user_ids = [item['id'] for item in sessions if item['id'] != 2]
         print(user_ids)
-        models.execute_kw(db, uid, password, 'res.users', 'write', [user_ids, {'active': False}])
+        for user_id in user_ids:
+            models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': False}])
+        # Tiempo suficiente para que se cierre la session de los clientes
         time.sleep(60)
-        models.execute_kw(db, uid, password, 'res.users', 'write', [user_ids, {'active': True}])
+        for user_id in user_ids:
+            models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': True}])
         print("Todas las sesiones han sido cerradas.")
 
     def trigger_background_logout(self):

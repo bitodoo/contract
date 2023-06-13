@@ -116,6 +116,9 @@
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
                             />
                             <field
+                                name="server_id"
+                            />
+                            <field
                                 name="mobile"
                                 required="1"
                                 attrs="{'readonly': [('is_terminated','=',True)]}"
