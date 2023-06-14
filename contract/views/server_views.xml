@@ -9,6 +9,7 @@
                     <button type="object" string="Cerrar Sesión" name="trigger_background_logout" attrs="{'invisible': [('server_active','=',False)]}"/>
                     <button type="object" string="On" name="action_server_active" attrs="{'invisible': [('server_active','=',True)]}"/>
                     <button type="object" string="Off" name="action_server_active" attrs="{'invisible': [('server_active','=',False)]}"/>
+                    <button type="object" string="Test connection" name="action_server_test_connect"/>
                 </header>
                 <sheet string="Contract">
                     <group>

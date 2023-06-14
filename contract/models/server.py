@@ -19,11 +19,13 @@ class KaServer(models.Model):
     code = fields.Char(string="Referencia")
     note = fields.Text(string="Notas")
     version = fields.Selection([
-        ('11', '11'),
-        ('12', '12'),
-        ('13', '13'),
-        ('14', '14'),
-        ('15', '15'),
+        ('11', '11.0'),
+        ('12', '12.0'),
+        ('13', '13.0'),
+        ('14', '14.0'),
+        ('15', '15.0'),
+        ('16', '16.0'),
+        ('17', '17.0'),
         ], string="Version", default='15', required=True)
     db = fields.Char(string="Base de datos", required=True)
     username_admin = fields.Char(string="Usuario administrator", required=True)
@@ -47,7 +49,10 @@ class KaServer(models.Model):
         # Obtener todas las sesiones activas
         sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
         print(sessions)
-        user_ids = [item['id'] for item in sessions if item['id'] != 2]
+        if self.version in ['15', '16', '17']:
+            user_ids = [item['id'] for item in sessions if item['id'] not in [1, 2]]
+        else:
+            user_ids = [item['id'] for item in sessions if item['id'] not in [1]]
         print(user_ids)
         for user_id in user_ids:
             models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': False}])
@@ -73,8 +78,12 @@ class KaServer(models.Model):
 
         if self.server_active:
             # Obtener todas las sesiones activas
-            sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id', 'name']})
-            user_ids = [item['id'] for item in sessions if item['id'] != 2]
+            sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
+            if self.version in ['15', '16', '17']:
+                user_ids = [item['id'] for item in sessions if item['id'] not in [1, 2]]
+            else:
+                user_ids = [item['id'] for item in sessions if item['id'] not in [1]]
+
             for user_id in user_ids:
                 models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': False}])
             self.server_user_ids = user_ids
@@ -85,7 +94,20 @@ class KaServer(models.Model):
                 models.execute_kw(db, uid, password, 'res.users', 'write', [[user_id], {'active': True}])
             self.server_user_ids = False
             self.server_active = True
-
-
         print("Todas las sesiones han sido suspendidas.")
 
+    def action_server_test_connect(self):
+        db = self.db
+        username = self.username_admin
+        password = self.password_admin
+
+        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
+        uid = common.authenticate(db, username, password, {})
+
+        # Conexión a la API de objetos
+        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
+
+        # Obtener todas las sesiones activas
+        sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
+
+        self.env.user.notify_success(message='Test connection successful.')
