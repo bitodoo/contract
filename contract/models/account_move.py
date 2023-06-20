@@ -26,6 +26,9 @@ class AccountMove(models.Model):
     website = fields.Char(related="contract_id.website")
     mobile = fields.Char(related="partner_id.mobile")
     is_nubefact = fields.Boolean(string="Nubefact?",related="contract_id.is_nubefact", store=True)
+    nubefact_start_date = fields.Date(string="F. Inicio", help="Enviado a Nubefact desde")
+    nubefact_end_date = fields.Date(string="F. Fin", help="Hasta")
+    total_comprobantes = fields.Integer(string="Total Comprobantes", help="Total de comprobantes enviados a Nubefact.")
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):
@@ -33,6 +36,16 @@ class AccountMove(models.Model):
             order.update({
                 'utility': order.amount_total - order.comission,
             })
+
+    def get_total_documents(self):
+        if self.is_nubefact:
+            models, db, uid, password = self.contract_id.server_id.ConnectClient()
+            total = models.execute_kw(db, uid, password, 'account.move', 'search_count', [[
+                ('l10n_pe_edi_date_ose_accepted',  '>=', self.nubefact_start_date),
+                ('l10n_pe_edi_date_ose_accepted', '<=', self.nubefact_end_date),
+                ('l10n_pe_edi_ose_accepted', '=', True),
+            ]])
+            self.total_comprobantes = total
 
 
 class AccountMoveLine(models.Model):

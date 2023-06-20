@@ -27,6 +27,7 @@
                             <field name="server_user_ids" readonly="1"/>
                         </group>
                     </group>
+                    <field name="server_notification" placeholder="Mensaje de notificación para el usuario suspendido. Vera al iniciar sesión."/>
                     <field name="note" placeholder="Notas"/>
                 </sheet>
             </form>

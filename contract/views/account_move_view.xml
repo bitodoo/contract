@@ -15,6 +15,15 @@
                 <field name="mobile"/>
                 <field name="contract_id"/>
                 <field name="is_nubefact"/>
+                <label for="nubefact_start_date" attrs="{'invisible': ['|',('is_nubefact','=',False),('state','!=','draft')]}"/>
+                <div attrs="{'invisible': ['|',('is_nubefact','=',False),('state','!=','draft')]}">
+                    <field name="nubefact_start_date" class="oe_inline"/> - <field name="nubefact_end_date" class="oe_inline" />
+                </div>
+                <label for="total_comprobantes" attrs="{'invisible': ['|',('is_nubefact','=',False),('state','!=','draft')]}"/>
+                <div attrs="{'invisible': ['|',('is_nubefact','=',False),('state','!=','draft')]}">
+                    <field name="total_comprobantes" readonly="1"/>
+                    <button type="object" name="get_total_documents" attrs="{'invisible': ['|',('is_nubefact','=',False),('state','!=','draft')]}" class="btn-sm btn-link mb4 fa fa-search" title="Consultar comprobantes"/>
+                </div>
             </field>
         </field>
     </record>

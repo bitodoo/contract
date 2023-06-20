@@ -592,7 +592,7 @@
         <field name="name">contract.contract tree view (in contract)</field>
         <field name="model">contract.contract</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-danger="not server_active and server_id">
                 <field name="name" string="Name" />
                 <field name="user_id" />
                 <field name="partner_id" />
@@ -605,6 +605,8 @@
                     widget="many2many_tags"
                     options="{'color_field': 'color'}"
                 />
+                <field name="server_id" invisible="1"/>
+                <field name="server_active" widget="boolean_toggle"/>
                 <field name="website"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>

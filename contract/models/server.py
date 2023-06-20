@@ -33,6 +33,10 @@ class KaServer(models.Model):
     website = fields.Char(string="Website")
     server_active = fields.Boolean(string="Servidor activo", default=True)
     server_user_ids = fields.Text(string="Usuarios no activos")
+    server_notification = fields.Text(
+        string="Mensaje de notificación",
+        default="Su cuenta a sido suspendido. Puede escribir al siguiente correo hola@kaypi.pe",
+        help="Mensaje de notificación para el usuario suspendido. Vera al iniciar sesión.")
 
     @api.model
     def session_logout_background_function(self):
@@ -111,3 +115,16 @@ class KaServer(models.Model):
         sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
 
         self.env.user.notify_success(message='Test connection successful.')
+
+    def ConnectClient(self):
+        db = self.db
+        username = self.username_admin
+        password = self.password_admin
+
+        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
+        uid = common.authenticate(db, username, password, {})
+
+        # Conexión a la API de objetos
+        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
+
+        return models, db, uid, password
