@@ -606,7 +606,8 @@
                     options="{'color_field': 'color'}"
                 />
                 <field name="server_id" invisible="1"/>
-                <field name="server_active" widget="boolean_toggle"/>
+                <field name="server_active" widget="boolean_toggle" optional="show"/>
+                <field name="version" optional="hide" widget="badge"/>
                 <field name="website"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>

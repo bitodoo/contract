@@ -177,6 +177,7 @@ class ContractContract(models.Model):
     is_nubefact = fields.Boolean(string="Nubefact?")
     server_id = fields.Many2one('ka.server', string="Servidor")
     server_active = fields.Boolean(related="server_id.server_active")
+    version = fields.Selection(related="server_id.version")
 
     @api.onchange('server_id')
     def onchange_server_id(self):
