@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="server_form_view" model="ir.ui.view">
+        <field name="name">ka.server</field>
+        <field name="model">ka.server</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button type="object" string="Cerrar Sesión" name="trigger_background_logout" invisible="not server_active"/>
+                    <button type="object" string="On" name="action_server_active" invisible="server_active"/>
+                    <button type="object" string="Off" name="action_server_active" invisible="not server_active"/>
+                    <button type="object" string="Test connection" name="action_server_test_connect"/>
+                </header>
+                <sheet string="Contract">
+                    <group>
+                        <group name="main" string="Datos">
+                            <field name="name"/>
+                            <field name="code" />
+                        </group>
+                        <group string="Servidor">
+                            <field name="version" />
+                            <field name="server_active" readonly="1"/>
+                            <field name="website" widget="url"/>
+                            <field name="db" />
+                            <field name="username_admin" />
+                            <field name="password_admin" />
+                            <field name="server_user_ids" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="server_notification" placeholder="Mensaje de notificación para el usuario suspendido. Vera al iniciar sesión."/>
+                    <field name="note" placeholder="Notas"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

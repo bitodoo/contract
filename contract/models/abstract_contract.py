@@ -18,7 +18,7 @@ class ContractAbstractContract(models.AbstractModel):
     # These fields will not be synced to the contract
     NO_SYNC = ["name", "partner_id", "company_id"]
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, default="/", readonly=True)
     # Needed for avoiding errors on several inherited behaviors
     partner_id = fields.Many2one(
         comodel_name="res.partner", string="Partner", index=True
@@ -32,7 +32,7 @@ class ContractAbstractContract(models.AbstractModel):
     journal_id = fields.Many2one(
         comodel_name="account.journal",
         string="Journal",
-        domain="[('type', '=', contract_type)]",
+        domain="[('type', '=', contract_type)," "('company_id', '=', company_id)]",
         compute="_compute_journal_id",
         store=True,
         readonly=False,

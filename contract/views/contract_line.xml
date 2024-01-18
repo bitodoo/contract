@@ -23,7 +23,7 @@
                 <group>
                     <field
                         name="date_end"
-                        attrs="{'required': [('is_auto_renew', '=', True)]}"
+                        required="is_auto_renew"
                     />
                     <field name="next_period_date_end" />
                 </group>
@@ -45,7 +45,7 @@
                 <group
                     name="analytic"
                     groups="analytic.group_analytic_accounting"
-                    attrs="{'invisible': [('display_type', '!=', False)]}"
+                    invisible="display_type"
                 >
                     <field
                         name="analytic_distribution"
@@ -108,7 +108,7 @@
                 <field name="automatic_price" />
                 <field
                     name="price_unit"
-                    attrs="{'readonly': [('automatic_price', '=', True)]}"
+                    readonly="automatic_price"
                 />
                 <field name="specific_price" invisible="1" />
                 <field name="discount" groups="base.group_no_one" />
@@ -133,21 +133,21 @@
                     title="Plan Start"
                     type="object"
                     icon="fa-calendar text-success"
-                    attrs="{'invisible': [('is_plan_successor_allowed', '=', False)]}"
+                    invisible="not is_plan_successor_allowed"
                 />
                 <button
                     name="action_stop_plan_successor"
                     title="Stop Plan Successor"
                     type="object"
                     icon="fa-pause text-muted"
-                    attrs="{'invisible': [('is_stop_plan_successor_allowed', '=', False)]}"
+                    invisible="not is_stop_plan_successor_allowed"
                 />
                 <button
                     name="action_stop"
                     title="Stop"
                     type="object"
                     icon="fa-stop text-danger"
-                    attrs="{'invisible': [('is_stop_allowed', '=', False)]}"
+                    invisible="not is_stop_allowed"
                 />
                 <button
                     name="cancel"
@@ -155,14 +155,14 @@
                     type="object"
                     icon="fa-ban text-danger"
                     confirm="Are you sure you want to cancel this line"
-                    attrs="{'invisible': [('is_cancel_allowed', '=', False)]}"
+                    invisible="not is_cancel_allowed"
                 />
                 <button
                     name="action_uncancel"
                     title="Un-cancel"
                     type="object"
                     icon="fa-ban text-success"
-                    attrs="{'invisible': [('is_un_cancel_allowed', '=', False)]}"
+                    invisible="not is_un_cancel_allowed"
                 />
                 <button
                     name="renew"
@@ -170,7 +170,7 @@
                     type="object"
                     icon="fa-fast-forward text-success"
                     groups="base.group_no_one"
-                    attrs="{'invisible': [('is_auto_renew', '=', False)]}"
+                    invisible="not is_auto_renew"
                 />
             </tree>
         </field>

@@ -17,7 +17,6 @@
                         <field
                             name="company_id"
                             options="{'no_create': True}"
-                            groups="base.group_multi_company"
                         />
                     </group>
                 </group>
@@ -48,11 +47,11 @@
                             <field name="uom_id" />
                             <field
                                 name="automatic_price"
-                                attrs="{'column_invisible': [('parent.contract_type','=','purchase')]}"
+                                column_invisible="parent.contract_type == 'purchase'"
                             />
                             <field
                                 name="price_unit"
-                                attrs="{'readonly': [('automatic_price', '=', True)]}"
+                                readonly="automatic_price"
                             />
                             <field name="specific_price" invisible="1" />
                             <field name="discount" groups="base.group_no_one" />
