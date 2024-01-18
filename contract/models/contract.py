@@ -149,7 +149,7 @@ class ContractContract(models.Model):
         store=True, compute='_amount_all',
         tracking=5
     )
-    tax_totals_json = fields.Char(
+    tax_totals_json = fields.Binary(
         compute='_compute_tax_totals_json'
     )
     amount_tax = fields.Monetary(
@@ -191,17 +191,12 @@ class ContractContract(models.Model):
 
     @api.depends('contract_line_fixed_ids.tax_id', 'contract_line_fixed_ids.price_unit', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
-        def compute_taxes(order_line):
-            price = order_line.price_unit * (1 - (order_line.discount or 0.0) / 100.0)
-            order = order_line.contract_id
-            return order_line.tax_id._origin.compute_all(price, order.pricelist_id.currency_id, order_line.quantity, product=order_line.product_id, partner=order.partner_id)
-
-        account_move = self.env['account.move']
         for order in self:
-            tax_lines_data = account_move._prepare_tax_lines_data_for_totals_from_object(order.contract_line_fixed_ids, compute_taxes)
-            tax_totals = account_move._get_tax_totals(order.partner_id, tax_lines_data, order.amount_total, order.amount_untaxed, order.pricelist_id.currency_id)
-            order.tax_totals_json = json.dumps(tax_totals)
-
+            contract_line = order.contract_line_fixed_ids.filtered(lambda x: not x.display_type)
+            order.tax_totals_json = self.env['account.tax']._prepare_tax_totals(
+                [x._convert_to_tax_base_line_dict() for x in contract_line],
+                order.currency_id or order.company_id.currency_id,
+            )
 
     @api.depends('contract_line_fixed_ids.price_total')
     def _amount_all(self):
