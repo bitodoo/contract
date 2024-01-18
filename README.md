@@ -1,9 +1,9 @@
 
-[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/contract&target_branch=16.0)
-[![Pre-commit Status](https://github.com/OCA/contract/actions/workflows/pre-commit.yml/badge.svg?branch=16.0)](https://github.com/OCA/contract/actions/workflows/pre-commit.yml?query=branch%3A16.0)
-[![Build Status](https://github.com/OCA/contract/actions/workflows/test.yml/badge.svg?branch=16.0)](https://github.com/OCA/contract/actions/workflows/test.yml?query=branch%3A16.0)
-[![codecov](https://codecov.io/gh/OCA/contract/branch/16.0/graph/badge.svg)](https://codecov.io/gh/OCA/contract)
-[![Translation Status](https://translation.odoo-community.org/widgets/contract-16-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/contract-16-0/?utm_source=widget)
+[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/contract&target_branch=17.0)
+[![Pre-commit Status](https://github.com/OCA/contract/actions/workflows/pre-commit.yml/badge.svg?branch=17.0)](https://github.com/OCA/contract/actions/workflows/pre-commit.yml?query=branch%3A17.0)
+[![Build Status](https://github.com/OCA/contract/actions/workflows/test.yml/badge.svg?branch=17.0)](https://github.com/OCA/contract/actions/workflows/test.yml?query=branch%3A17.0)
+[![codecov](https://codecov.io/gh/OCA/contract/branch/17.0/graph/badge.svg)](https://codecov.io/gh/OCA/contract)
+[![Translation Status](https://translation.odoo-community.org/widgets/contract-17.0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/contract-17.0/?utm_source=widget)
 
 <!-- /!\ do not modify above this line -->
 
@@ -21,13 +21,13 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[agreement_rebate_partner_company_group](agreement_rebate_partner_company_group/) | 16.0.1.0.0 |  | Rebate agreements applied to all company group members
-[contract](contract/) | 16.0.2.0.0 |  | Recurring - Contracts Management
-[contract_invoice_start_end_dates](contract_invoice_start_end_dates/) | 16.0.1.0.0 | [![florian-dacosta](https://github.com/florian-dacosta.png?size=30px)](https://github.com/florian-dacosta) | Contract Invoice Start End Dates
-[contract_payment_mode](contract_payment_mode/) | 16.0.1.0.0 |  | Payment mode in contracts and their invoices
-[contract_sale](contract_sale/) | 16.0.1.1.0 |  | Contract from Sale
-[contract_sale_generation](contract_sale_generation/) | 16.0.1.0.0 |  | Contracts Management - Recurring Sales
-[contract_variable_quantity](contract_variable_quantity/) | 16.0.1.0.0 |  | Variable quantity in contract recurrent invoicing
+[agreement_rebate_partner_company_group](agreement_rebate_partner_company_group/) | 17.0.1.0.0 |  | Rebate agreements applied to all company group members
+[contract](contract/) | 17.0.2.0.0 |  | Recurring - Contracts Management
+[contract_invoice_start_end_dates](contract_invoice_start_end_dates/) | 17.0.1.0.0 | [![florian-dacosta](https://github.com/florian-dacosta.png?size=30px)](https://github.com/florian-dacosta) | Contract Invoice Start End Dates
+[contract_payment_mode](contract_payment_mode/) | 17.0.1.0.0 |  | Payment mode in contracts and their invoices
+[contract_sale](contract_sale/) | 17.0.1.1.0 |  | Contract from Sale
+[contract_sale_generation](contract_sale_generation/) | 17.0.1.0.0 |  | Contracts Management - Recurring Sales
+[contract_variable_quantity](contract_variable_quantity/) | 17.0.1.0.0 |  | Variable quantity in contract recurrent invoicing
 
 [//]: # (end addons)
 
