@@ -15,14 +15,11 @@
                 <field name="mobile"/>
                 <field name="contract_id"/>
                 <field name="is_nubefact"/>
-                <label for="nubefact_start_date" invisible="is_nubefact == False or state == 'draft'"/>
-                <div nvisible="is_nubefact == False or state == 'draft'">
-                    <field name="nubefact_start_date" class="oe_inline"/> - <field name="nubefact_end_date" class="oe_inline" />
-                </div>
-                <label for="total_comprobantes" nvisible="is_nubefact == False or state == 'draft'"/>
-                <div nvisible="is_nubefact == False or state == 'draft'">
+                <field name="nubefact_start_date" widget="daterange" options='{"end_date_field": "nubefact_end_date", "always_range": "1"}' invisible="is_nubefact == False or state == 'draft'"/>
+                <label for="total_comprobantes" invisible="is_nubefact == False or state == 'draft'"/>
+                <div class="o_row" invisible="is_nubefact == False or state == 'draft'">
                     <field name="total_comprobantes" readonly="1"/>
-                    <button type="object" name="get_total_documents" nvisible="is_nubefact == False or state == 'draft'" class="btn-sm btn-link mb4 fa fa-search" title="Consultar comprobantes"/>
+                    <button type="object" name="get_total_documents" invisible="is_nubefact == False or state == 'draft'" class="btn-sm btn-link mb4 fa fa-search" title="Consultar comprobantes"/>
                 </div>
             </field>
         </field>

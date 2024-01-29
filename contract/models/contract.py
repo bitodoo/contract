@@ -6,6 +6,7 @@
 # Copyright 2018 ACSONE SA/NV
 # Copyright 2021 Tecnativa - Víctor Martínez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+from markupsafe import Markup
 import logging
 
 from odoo import Command, api, fields, models
@@ -522,6 +523,7 @@ class ContractContract(models.Model):
             "invoice_date": date_invoice,
             "journal_id": journal.id,
             "invoice_origin": self.name,
+            "contract_id": self.id,
             "invoice_line_ids": [],
         }
         if self.payment_term_id:
@@ -671,7 +673,7 @@ class ContractContract(models.Model):
         invoices = self._recurring_create_invoice()
         for invoice in invoices:
             self.message_post(
-                body=_(
+                body=Markup(_(
                     "Contract manually invoiced: "
                     "<a"
                     '    href="#" data-oe-model="%(model_name)s" '
@@ -683,7 +685,7 @@ class ContractContract(models.Model):
                     "model_name": invoice._name,
                     "rec_id": invoice.id,
                 }
-            )
+            ))
         return invoices
 
     @api.model
@@ -706,7 +708,7 @@ class ContractContract(models.Model):
             for move in invoices & item._get_related_invoices():
                 move.message_post(
                     body=(
-                        _(
+                        Markup(_(
                             (
                                 "%(msg)s by contract <a href=# data-oe-model=contract.contract"
                                 " data-oe-id=%(contract_id)d>%(contract)s</a>."
@@ -715,12 +717,13 @@ class ContractContract(models.Model):
                             contract_id=item.id,
                             contract=item.display_name,
                         )
-                    )
+                    ))
                 )
 
     def _recurring_create_invoice(self, date_ref=False):
         invoices_values = self._prepare_recurring_invoices_values(date_ref)
         moves = self.env["account.move"].create(invoices_values)
+        moves.invoice_line_ids._onchange_product_id()
         self._add_contract_origin(moves)
         self._invoice_followers(moves)
         self._compute_recurring_next_date()

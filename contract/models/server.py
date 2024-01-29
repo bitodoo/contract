@@ -114,7 +114,8 @@ class KaServer(models.Model):
         # Obtener todas las sesiones activas
         sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
 
-        self.env.user.notify_success(message='Test connection successful.')
+        message='Test connection successful.'
+        print(message)
 
     def ConnectClient(self):
         db = self.db

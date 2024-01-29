@@ -591,7 +591,7 @@
                     widget="many2many_tags"
                     options="{'color_field': 'color'}"
                 />
-                <field name="server_id" invisible="1"/>
+                <field name="server_id" column_invisible="1"/>
                 <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
                 <field name="website"/>
