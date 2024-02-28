@@ -158,6 +158,18 @@
                                 name="is_nubefact"
                             />
                             <field
+                                name="invoice_post" widget="boolean_toggle"
+                            />
+                            <field
+                                name="send_whatsapp" widget="boolean_toggle"
+                            />
+                            <field
+                                name="template_id" invisible="not send_whatsapp" required="send_whatsapp" options="{'no_create': True}"
+                            />
+                            <field
+                                name="connector_id" invisible="not send_whatsapp" required="send_whatsapp" options="{'no_create': True}"
+                            />
+                            <field
                                 name="tag_ids"
                                 widget="many2many_tags"
                                 options="{'color_field': 'color'}"

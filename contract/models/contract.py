@@ -178,6 +178,18 @@ class ContractContract(models.Model):
     server_id = fields.Many2one('ka.server', string="Servidor")
     server_active = fields.Boolean(related="server_id.server_active")
     version = fields.Selection(related="server_id.version")
+    invoice_post = fields.Boolean(string="Publicar factura", default=True)
+    send_whatsapp = fields.Boolean(
+        string="Enviar por whatsapp",
+        default=True,
+        help="Para el envío de las facturas por whatsapp debe de cumplir las siguientes condiciones:"
+             "1. El cliente debe tener registrado un número de celular."
+             "2. La factura tiene que estar en estado publicado."
+             "3. Tiene que estar dentro de la Fecha de factura - Fecha de vencimiento."
+             "4. Relacionado a un contrato y estar activo el campo Enviar whatsapp.")
+    template_id = fields.Many2one('mail.template', 'Plantilla',
+                                  domain="[('model', '=', 'account.move'), ('name', 'ilike', 'ChatRoom')]")
+    connector_id = fields.Many2one('acrux.chat.connector', string='Canal')
 
     @api.onchange('server_id')
     def onchange_server_id(self):
@@ -720,6 +732,13 @@ class ContractContract(models.Model):
                     ))
                 )
 
+    @api.model
+    def _invoice_post(self, invoices):
+        for item in self:
+            if item.invoice_post:
+                for move in invoices & item._get_related_invoices():
+                    move.action_post()
+
     def _recurring_create_invoice(self, date_ref=False):
         invoices_values = self._prepare_recurring_invoices_values(date_ref)
         moves = self.env["account.move"].create(invoices_values)
@@ -727,6 +746,7 @@ class ContractContract(models.Model):
         self._add_contract_origin(moves)
         self._invoice_followers(moves)
         self._compute_recurring_next_date()
+        self._invoice_post(moves)
         return moves
 
     @api.model

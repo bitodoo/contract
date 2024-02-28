@@ -26,7 +26,7 @@ class KaServer(models.Model):
         ('15', '15.0'),
         ('16', '16.0'),
         ('17', '17.0'),
-        ], string="Version", default='15', required=True)
+        ], string="Version", default='17', required=True)
     db = fields.Char(string="Base de datos", required=True)
     username_admin = fields.Char(string="Usuario administrator", required=True)
     password_admin = fields.Char(string="Contraseña administrator", required=True)
