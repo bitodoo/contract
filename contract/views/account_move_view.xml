@@ -14,6 +14,7 @@
                 <field name="website"/>
                 <field name="mobile"/>
                 <field name="contract_id"/>
+                <field name="message_sent_to_whatsapp"/>
                 <field name="is_nubefact"/>
                 <field name="nubefact_start_date" widget="daterange" options='{"end_date_field": "nubefact_end_date", "always_range": "1"}' invisible="is_nubefact == False or state == 'draft'"/>
                 <label for="total_comprobantes" invisible="is_nubefact == False or state == 'draft'"/>

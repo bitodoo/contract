@@ -29,7 +29,9 @@ class AccountMove(models.Model):
     nubefact_start_date = fields.Date(string="F. Inicio", help="Enviado a Nubefact desde")
     nubefact_end_date = fields.Date(string="F. Fin", help="Hasta")
     total_comprobantes = fields.Integer(string="Total Comprobantes", help="Total de comprobantes enviados a Nubefact.")
-    message_sent_to_whatsapp = fields.Boolean(string="Mensaje enviado a Whatsapp", default=False)
+    message_sent_to_whatsapp = fields.Boolean(
+        string="Enviado a Whatsapp", default=False,
+        help="Indica si el mensaje fue enviado a whatsapp.")
 
     @api.depends('amount_total', 'comission')
     def _compute_utility(self):
@@ -58,7 +60,7 @@ class AccountMove(models.Model):
             ('contract_id.send_whatsapp', '=', True),
             ('invoice_date', '<=', fields.Date.context_today(self)),
             ('invoice_date_due', '>=', fields.Date.context_today(self)),
-            # ('message_sent_to_whatsapp', '=', False )
+            ('message_sent_to_whatsapp', '=', False )
         ]
         moves = self.search(domain)
         for move in moves:
@@ -85,9 +87,13 @@ class AccountMove(models.Model):
                 })
             wizard = MessageWizard.create(vals)
             wizard.onchange_template_id_wrapper()
+            # Por alguna razon se borrar el registro de ir.attachment cuando
+            # se ejecuta desde el cron por eso se puso el commit
+            wizard._cr.commit()
             wizard.send_message_wizard()
             print("Mensaje enviado a whatsapp.")
-            # move.message_sent_to_whatsapp = True
+            move.message_sent_to_whatsapp = True
+        return True
 
 
 class AccountMoveLine(models.Model):
