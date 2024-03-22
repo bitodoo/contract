@@ -58,39 +58,70 @@ class AccountMove(models.Model):
             ('partner_id.mobile', '!=', False),
             ('state', '=', 'posted'),
             ('contract_id.send_whatsapp', '=', True),
-            ('invoice_date', '<=', fields.Date.context_today(self)),
-            ('invoice_date_due', '>=', fields.Date.context_today(self)),
+            # ('invoice_date', '<=', fields.Date.context_today(self)),
+            # ('invoice_date_due', '>=', fields.Date.context_today(self)),
             ('message_sent_to_whatsapp', '=', False )
         ]
         moves = self.search(domain)
+        print('moves', moves)
         for move in moves:
-            vals = {
-                'new_number': True,
-                'conversation_id': False,
-                'connector_id': move.contract_id.connector_id.id,
-                'number': move.partner_id.mobile,
-                'invisible_top': False,
-                'template_id': move.contract_id.template_id.id,
-                'text': 'Hola, te enviamos tu factura desde el cron.',
-                'attachment_ids': [],
-                'model': 'account.move',
-                'res_id': move.id,
-                'partner_id': move.partner_id.id,
-            }
-            contact_ids = self.env['res.partner'].browse([move.partner_id.id]).contact_ids
-            conversation_id = contact_ids[0].id if contact_ids else False
-            if conversation_id:
-                vals.update({
-                    'new_number': False,
-                    'conversation_id': conversation_id,
-                    'connector_id': False,
-                })
-            wizard = MessageWizard.create(vals)
-            wizard.onchange_template_id_wrapper()
-            # Por alguna razon se borrar el registro de ir.attachment cuando
-            # se ejecuta desde el cron por eso se puso el commit
-            wizard._cr.commit()
-            wizard.send_message_wizard()
+            if move.contract_id.contact_ids:
+                for partner_id in move.contract_id.contact_ids:
+                    vals = {
+                        'new_number': True,
+                        'conversation_id': False,
+                        'connector_id': move.contract_id.connector_id.id,
+                        'number': partner_id.mobile,
+                        'invisible_top': False,
+                        'template_id': move.contract_id.template_id.id,
+                        'text': 'Hola, te enviamos tu factura desde el cron.',
+                        'attachment_ids': [],
+                        'model': 'account.move',
+                        'res_id': move.id,
+                        'partner_id': partner_id.id,
+                    }
+                    contact_ids = self.env['res.partner'].browse([partner_id.id]).contact_ids
+                    conversation_id = contact_ids[0].id if contact_ids else False
+                    if conversation_id:
+                        vals.update({
+                            'new_number': False,
+                            'conversation_id': conversation_id,
+                            'connector_id': False,
+                        })
+                    wizard = MessageWizard.create(vals)
+                    wizard.onchange_template_id_wrapper()
+                    # Por alguna razon se borrar el registro de ir.attachment cuando
+                    # se ejecuta desde el cron por eso se puso el commit
+                    wizard._cr.commit()
+                    wizard.send_message_wizard()
+            else:
+                vals = {
+                    'new_number': True,
+                    'conversation_id': False,
+                    'connector_id': move.contract_id.connector_id.id,
+                    'number': move.partner_id.mobile,
+                    'invisible_top': False,
+                    'template_id': move.contract_id.template_id.id,
+                    'text': 'Hola, te enviamos tu factura desde el cron.',
+                    'attachment_ids': [],
+                    'model': 'account.move',
+                    'res_id': move.id,
+                    'partner_id': move.partner_id.id,
+                }
+                contact_ids = self.env['res.partner'].browse([move.partner_id.id]).contact_ids
+                conversation_id = contact_ids[0].id if contact_ids else False
+                if conversation_id:
+                    vals.update({
+                        'new_number': False,
+                        'conversation_id': conversation_id,
+                        'connector_id': False,
+                    })
+                wizard = MessageWizard.create(vals)
+                wizard.onchange_template_id_wrapper()
+                # Por alguna razon se borrar el registro de ir.attachment cuando
+                # se ejecuta desde el cron por eso se puso el commit
+                wizard._cr.commit()
+                wizard.send_message_wizard()
             print("Mensaje enviado a whatsapp.")
             move.message_sent_to_whatsapp = True
         return True
