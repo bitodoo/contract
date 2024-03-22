@@ -170,6 +170,11 @@
                                 name="connector_id" invisible="not send_whatsapp" required="send_whatsapp" options="{'no_create': True}"
                             />
                             <field
+                                name="contact_ids"
+                                widget="many2many_tags" options="{'no_create': True, 'no_open': True, 'no_edit': True}"
+                                invisible="not send_whatsapp"
+                            />
+                            <field
                                 name="tag_ids"
                                 widget="many2many_tags"
                                 options="{'color_field': 'color'}"
@@ -537,6 +542,16 @@
                                 </p>
                             </group>
                         </page>
+                        <page string="Facturación Electrónica">
+                            <group>
+                                <group>
+                                    <field name="certificate_date_due"/>
+                                </group>
+                                <group>
+                                    <field name="notify_certificate_date_due"/>
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -590,11 +605,13 @@
         <field name="name">contract.contract tree view (in contract)</field>
         <field name="model">contract.contract</field>
         <field name="arch" type="xml">
-            <tree decoration-danger="not server_active and server_id">
+            <tree decoration-danger="notify_certificate_date_due and notify_certificate_date_due &lt; context_today().strftime('%Y-%m-%d')">
                 <field name="name" string="Name" />
-                <field name="user_id" />
+                <field name="user_id" optional="hide"/>
                 <field name="partner_id" />
-                <field name="mobile"/>
+                <field name="mobile" optional="hide"/>
+                <field name="certificate_date_due" widget='remaining_days' optional="show"/>
+                <field name="notify_certificate_date_due" optional="hide"/>
                 <field name="recurring_interval" />
                 <field name="recurring_rule_type" />
                 <field name="journal_id" groups="account.group_account_user" />
@@ -602,16 +619,17 @@
                     name="tag_ids"
                     widget="many2many_tags"
                     options="{'color_field': 'color'}"
+                    optional="hide"
                 />
                 <field name="server_id" column_invisible="1"/>
                 <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
-                <field name="website"/>
+                <field name="website" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>
                 <field name="comission"/>
                 <field name="utility"/>
-                <field name="recurring_next_date"/>
+                <field name="recurring_next_date" optional="show"/>
             </tree>
         </field>
     </record>

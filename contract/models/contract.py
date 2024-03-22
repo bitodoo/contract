@@ -190,6 +190,16 @@ class ContractContract(models.Model):
     template_id = fields.Many2one('mail.template', 'Plantilla',
                                   domain="[('model', '=', 'account.move'), ('name', 'ilike', 'ChatRoom')]")
     connector_id = fields.Many2one('acrux.chat.connector', string='Canal')
+    child_ids = fields.One2many(related="partner_id.child_ids")
+    # NO SE RELACIONO CON EL CAMPO partner_id.child_ids PORQUE NO DEJA CREAR NUEVOS CONTACTOS
+    # MEJOR LE CREO UN CAMPO NUEVO E INDEPENDIENTE
+    contact_ids = fields.Many2many(
+        'res.partner', string='Contactos',
+        help="Contactos a los que se enviará el mensaje de whatsapp")
+    certificate_date_due = fields.Date(
+        string="F. venc.", help="Fecha de vencimiento del certificado (SUNAT)")
+    notify_certificate_date_due = fields.Date(
+        string="Notificación F. venc.", help="Notificación antes de la fecha de vencimiento del certificado (SUNAT)")
 
     @api.onchange('server_id')
     def onchange_server_id(self):
