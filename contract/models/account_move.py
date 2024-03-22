@@ -58,8 +58,8 @@ class AccountMove(models.Model):
             ('partner_id.mobile', '!=', False),
             ('state', '=', 'posted'),
             ('contract_id.send_whatsapp', '=', True),
-            # ('invoice_date', '<=', fields.Date.context_today(self)),
-            # ('invoice_date_due', '>=', fields.Date.context_today(self)),
+            ('invoice_date', '<=', fields.Date.context_today(self)),
+            ('invoice_date_due', '>=', fields.Date.context_today(self)),
             ('message_sent_to_whatsapp', '=', False )
         ]
         moves = self.search(domain)
