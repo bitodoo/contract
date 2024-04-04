@@ -53,7 +53,7 @@ class KaServer(models.Model):
         # Obtener todas las sesiones activas
         sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
         print(sessions)
-        if self.version in ['15', '16', '17']:
+        if self.version in ['14', '15', '16', '17']:
             user_ids = [item['id'] for item in sessions if item['id'] not in [1, 2]]
         else:
             user_ids = [item['id'] for item in sessions if item['id'] not in [1]]
@@ -83,7 +83,7 @@ class KaServer(models.Model):
         if self.server_active:
             # Obtener todas las sesiones activas
             sessions = models.execute_kw(db, uid, password, 'res.users', 'search_read', [[('active', '=', True)]], {'fields': ['id']})
-            if self.version in ['15', '16', '17']:
+            if self.version in ['14', '15', '16', '17']:
                 user_ids = [item['id'] for item in sessions if item['id'] not in [1, 2]]
             else:
                 user_ids = [item['id'] for item in sessions if item['id'] not in [1]]

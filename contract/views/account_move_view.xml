@@ -11,6 +11,8 @@
                 <field name="utility" colspan="2"/>
             </field>
             <field name="partner_id" position="after">
+                <field name="server_id" invisible="True" />
+                <field name="server_active" invisible="True" />
                 <field name="website"/>
                 <field name="mobile"/>
                 <field name="contract_id"/>
@@ -23,6 +25,10 @@
                     <button type="object" name="get_total_documents" invisible="is_nubefact == False or state == 'draft'" class="btn-sm btn-link mb4 fa fa-search" title="Consultar comprobantes"/>
                 </div>
             </field>
+            <button name="action_post" position="before">
+                <button type="object" string="On" name="action_server_active" invisible="(not contract_id or not server_id) or server_active" title="Active users DB"/>
+                <button type="object" string="Off" name="action_server_active" invisible="(not contract_id or not server_id) or not server_active" title="Deactive users DB"/>
+            </button>
         </field>
     </record>
     <!--TREE view-->
@@ -45,8 +51,12 @@
                 <field name="website" optional="show" />
             </xpath>
             <xpath expr="//tree[1]/field[@name='name']" position="after">
+                <field name="server_id" column_invisible="True" />
+                <field name="server_active" column_invisible="True" />
+                <button name="action_server_active" class="text-success" type="object" string="On" icon="fa-toggle-on" invisible="(not contract_id or not server_id) or server_active" title="Active users DB"/>
+                <button name="action_server_active" class="text-warning" type="object" string="Off" icon="fa-toggle-off" invisible="(not contract_id or not server_id) or not server_active" title="Deactive users DB"/>
                 <field name="contract_id" optional="show" />
-                <field name="is_nubefact" optional="show" />
+                <field name="is_nubefact" optional="hide" />
             </xpath>
             <xpath expr="//tree[1]/field[@name='invoice_date_due']" position="attributes">
                 <attribute name="optional">hide</attribute>

@@ -12,6 +12,8 @@ class AccountMove(models.Model):
     # We keep this field for migration purpose
     old_contract_id = fields.Many2one("contract.contract")
     contract_id = fields.Many2one("contract.contract", string="Contrato")
+    server_id = fields.Many2one(related="contract_id.server_id")
+    server_active = fields.Boolean(related="contract_id.server_active")
     comission = fields.Monetary(
         string='Comisión',
         tracking=4,
@@ -63,7 +65,6 @@ class AccountMove(models.Model):
             ('message_sent_to_whatsapp', '=', False )
         ]
         moves = self.search(domain)
-        print('moves', moves)
         for move in moves:
             if move.contract_id.contact_ids:
                 for partner_id in move.contract_id.contact_ids:
@@ -125,6 +126,10 @@ class AccountMove(models.Model):
             print("Mensaje enviado a whatsapp.")
             move.message_sent_to_whatsapp = True
         return True
+
+    def action_server_active(self):
+        for move in self:
+            move.server_id.action_server_active()
 
 
 class AccountMoveLine(models.Model):
