@@ -51,7 +51,7 @@ class AccountMove(models.Model):
                 ('l10n_pe_edi_ose_accepted', '=', True),
             ]])
             self.total_comprobantes = total
-    
+
     @api.model
     def cron_recurring_send_whatsapp_invoice(self):
         print('cron_recurring_send_whatsapp_invoice')

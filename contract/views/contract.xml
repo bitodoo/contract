@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+    <!-- Consulta masiva de datos -->
+    <record id="r_actions_server_action_unsent_invoices" model="ir.actions.server">
+        <field name="name">CONSULTA FE NO ENVIADOS A SUNAT</field>
+        <field name="model_id" ref="contract.model_contract_contract" />
+        <field name="binding_model_id" ref="contract.model_contract_contract" />
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_unsent_invoices()</field>
+    </record>
+
     <!--Main FORM view-->
     <record id="contract_contract_form_view" model="ir.ui.view">
         <field name="name">contract.contract form view (in contract)</field>
@@ -546,9 +556,19 @@
                             <group>
                                 <group>
                                     <field name="certificate_date_due"/>
+                                    <field name="notify_certificate_date_due"/>
                                 </group>
                                 <group>
-                                    <field name="notify_certificate_date_due"/>
+                                    <label for="unsent_invoices"/>
+                                    <div class="o_row">
+                                        <field name="unsent_invoices"/>
+                                        <button
+                                            type="object"
+                                            name="action_unsent_invoices"
+                                            class="btn-sm btn-link mb4 fa fa-cog"
+                                            aria-label="More languages"
+                                            title="Consulta de facturas elec. no enviadas"/>
+                                    </div>
                                 </group>
                             </group>
                         </page>
@@ -625,6 +645,7 @@
                 <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
                 <field name="website" optional="show"/>
+                <field name="unsent_invoices" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>
                 <field name="comission"/>

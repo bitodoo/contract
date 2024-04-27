@@ -14,6 +14,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.translate import _
 
+import xmlrpc.client
 _logger = logging.getLogger(__name__)
 
 
@@ -200,6 +201,7 @@ class ContractContract(models.Model):
         string="F. venc.", help="Fecha de vencimiento del certificado (SUNAT)")
     notify_certificate_date_due = fields.Date(
         string="Notificación F. venc.", help="Notificación antes de la fecha de vencimiento del certificado (SUNAT)")
+    unsent_invoices = fields.Text(string='Facturas no enviadas')
 
     @api.onchange('server_id')
     def onchange_server_id(self):
@@ -847,3 +849,29 @@ class ContractContract(models.Model):
             seq = self.env["ir.sequence"].next_by_code("sequence_contract") or 0
             vals["name"] = seq
         return super(ContractContract, self).create(vals_list)
+
+    def action_unsent_invoices(self):
+        for contract in self:
+            invoices = []
+            if contract.is_nubefact:
+                if contract.server_id.ConnectClient():
+                    models, db, uid, password = contract.server_id.ConnectClient()
+                    total = models.execute_kw(db, uid, password, 'account.move', 'search_count', [[
+                        ('l10n_pe_edi_date_ose_accepted',  '>=', contract.nubefact_start_date),
+                        ('l10n_pe_edi_date_ose_accepted', '<=', contract.nubefact_end_date),
+                        ('l10n_pe_edi_ose_accepted', '=', True),
+                    ]])
+                    contract.total_comprobantes = total
+            else:
+                if contract.version == '17':
+                    if contract.server_id.ConnectClient():
+                        models, db, uid, password = contract.server_id.ConnectClient()
+                        try:
+                            invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
+                                ('state', '=', 'posted'),
+                                ('pe_sunat_status', '=', 'noaceptado'),
+                                ('pe_is_cpe', '=', True),
+                            ]], {'fields': ['name']})
+                            contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
+                        except xmlrpc.client.Fault as e:
+                            logging.exception("xmlrpc.client.Fault occurred: %s", e)

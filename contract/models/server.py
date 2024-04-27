@@ -1,6 +1,8 @@
 import xmlrpc.client
 import time
 from ast import literal_eval
+import logging
+_logger = logging.getLogger(__name__)
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -121,11 +123,13 @@ class KaServer(models.Model):
         db = self.db
         username = self.username_admin
         password = self.password_admin
+        try:
+            common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
+            uid = common.authenticate(db, username, password, {})
 
-        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(self.website))
-        uid = common.authenticate(db, username, password, {})
+            # Conexión a la API de objetos
+            models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
+            return models, db, uid, password
+        except ConnectionRefusedError as e:
+            _logger.error("ConnectionRefusedError occurred: [Errno 111] Conexión rehusada a %s", self.website)
 
-        # Conexión a la API de objetos
-        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(self.website))
-
-        return models, db, uid, password
