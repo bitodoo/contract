@@ -177,8 +177,8 @@ class ContractContract(models.Model):
     )
     is_nubefact = fields.Boolean(string="Nubefact?")
     server_id = fields.Many2one('ka.server', string="Servidor")
-    server_active = fields.Boolean(related="server_id.server_active")
-    version = fields.Selection(related="server_id.version")
+    server_active = fields.Boolean(related="server_id.server_active", store=True)
+    version = fields.Selection(related="server_id.version", store=True)
     invoice_post = fields.Boolean(string="Publicar factura", default=True)
     send_whatsapp = fields.Boolean(
         string="Enviar por whatsapp",
@@ -852,6 +852,10 @@ class ContractContract(models.Model):
 
     def action_unsent_invoices(self):
         for contract in self:
+            _logger.info("=" * 40)
+            _logger.info(contract.name)
+            _logger.info(contract.server_id.name)
+            _logger.info("=" * 40)
             invoices = []
             if contract.is_nubefact:
                 if contract.server_id.ConnectClient():
