@@ -129,6 +129,7 @@
                             />
                             <field
                                 name="website"
+                                widget="url"
                                 required="1"
                                 readonly="is_terminated"
                             />
@@ -644,7 +645,7 @@
                 <field name="server_id" column_invisible="1"/>
                 <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
-                <field name="website" optional="show"/>
+                <field name="website" widget="url" optional="show"/>
                 <field name="unsent_invoices" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>
