@@ -750,6 +750,7 @@ class ContractContract(models.Model):
             if item.invoice_post:
                 for move in invoices & item._get_related_invoices():
                     move.action_post()
+                    move._cr.commit()
 
     def _recurring_create_invoice(self, date_ref=False):
         invoices_values = self._prepare_recurring_invoices_values(date_ref)
