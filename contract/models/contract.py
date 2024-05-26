@@ -857,15 +857,18 @@ class ContractContract(models.Model):
             _logger.info(contract.server_id.name)
             _logger.info("=" * 40)
             invoices = []
-            if contract.is_nubefact:
+            if contract.is_nubefact and contract.version == '15':
                 if contract.server_id.ConnectClient():
                     models, db, uid, password = contract.server_id.ConnectClient()
-                    total = models.execute_kw(db, uid, password, 'account.move', 'search_count', [[
-                        ('l10n_pe_edi_date_ose_accepted',  '>=', contract.nubefact_start_date),
-                        ('l10n_pe_edi_date_ose_accepted', '<=', contract.nubefact_end_date),
-                        ('l10n_pe_edi_ose_accepted', '=', True),
-                    ]])
-                    contract.total_comprobantes = total
+                    try:
+                        invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
+                            ('state', '=', 'posted'),
+                            ('l10n_pe_edi_ose_accepted', '=', False),
+                            ('l10n_pe_edi_is_einvoice', '=', True),
+                        ]], {'fields': ['name']})
+                        contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
+                    except xmlrpc.client.Fault as e:
+                        logging.exception("xmlrpc.client.Fault occurred: %s", e)
             else:
                 if contract.version == '17':
                     if contract.server_id.ConnectClient():

@@ -47,15 +47,14 @@
             <xpath expr="//tree[1]/field[@name='invoice_date']" position="before">
                 <field name="mobile" optional="show"/>
             </xpath>
-            <xpath expr="//tree[1]/field[@name='state']" position="after">
-                <field name="website" optional="show" />
-            </xpath>
             <xpath expr="//tree[1]/field[@name='name']" position="after">
+                <field name="website" optional="show" widget="url"/>
                 <field name="server_id" column_invisible="True" />
                 <field name="server_active" column_invisible="True" />
                 <button name="action_server_active" class="text-success" type="object" string="On" icon="fa-toggle-on" invisible="(not contract_id or not server_id) or server_active" title="Active users DB"/>
                 <button name="action_server_active" class="text-warning" type="object" string="Off" icon="fa-toggle-off" invisible="(not contract_id or not server_id) or not server_active" title="Deactive users DB"/>
                 <field name="contract_id" optional="show" />
+                <field name="message_sent_to_whatsapp" string="WA" optional="hide" />
                 <field name="is_nubefact" optional="hide" />
             </xpath>
             <xpath expr="//tree[1]/field[@name='invoice_date_due']" position="attributes">

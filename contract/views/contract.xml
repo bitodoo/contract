@@ -710,6 +710,12 @@
                         domain="[]"
                         context="{'group_by':'date_end'}"
                     />
+                    <filter
+                        name="group_by_version"
+                        string="Version"
+                        domain="[]"
+                        context="{'group_by':'version'}"
+                    />
                 </group>
             </search>
         </field>
