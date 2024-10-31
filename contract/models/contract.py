@@ -7,6 +7,7 @@
 # Copyright 2021 Tecnativa - Víctor Martínez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from markupsafe import Markup
+from datetime import datetime, timedelta
 import logging
 
 from odoo import Command, api, fields, models
@@ -852,6 +853,15 @@ class ContractContract(models.Model):
         return super(ContractContract, self).create(vals_list)
 
     def action_unsent_invoices(self):
+        # Obtén la fecha actual
+        current_date = datetime.now()
+
+        # Calcula la fecha que corresponde a dos meses atrás
+        two_months_ago = current_date - timedelta(days=60)
+
+        # Convierte la fecha a string en formato ISO (aaaa-mm-dd) para Odoo
+        two_months_ago_str = two_months_ago.strftime('%Y-%m-%d')
+
         for contract in self:
             _logger.info("=" * 40)
             _logger.info(contract.name)
@@ -866,8 +876,9 @@ class ContractContract(models.Model):
                             ('state', '=', 'posted'),
                             ('l10n_pe_edi_ose_accepted', '=', False),
                             ('l10n_pe_edi_is_einvoice', '=', True),
+                            ('invoice_date', '>=', two_months_ago_str),
                         ]], {'fields': ['name']})
-                        contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
+                        contract.unsent_invoices = "# %s" % len(invoices)
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
             else:
@@ -879,7 +890,8 @@ class ContractContract(models.Model):
                                 ('state', '=', 'posted'),
                                 ('pe_sunat_status', '=', 'noaceptado'),
                                 ('pe_is_cpe', '=', True),
+                                ('invoice_date', '>=', two_months_ago_str),
                             ]], {'fields': ['name']})
-                            contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
+                            contract.unsent_invoices = "# %s" % len(invoices)
                         except xmlrpc.client.Fault as e:
                             logging.exception("xmlrpc.client.Fault occurred: %s", e)
