@@ -16,6 +16,7 @@ class AccountMove(models.Model):
     server_active = fields.Boolean(related="contract_id.server_active")
     comission = fields.Monetary(
         string='Comisión',
+        related="contract_id.comission",
         tracking=4,
         readonly=True
     )
