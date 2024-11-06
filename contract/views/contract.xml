@@ -679,6 +679,11 @@
                     string="Finished"
                     domain="[('date_end', '&lt;', context_today().strftime('%Y-%m-%d')), ('recurring_next_date', '=', False)]"
                 />
+                <filter
+                    name="not_generated"
+                    string="Pendientes de generación"
+                    domain="[('recurring_next_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"
+                />
                 <field name="partner_id" />
                 <field name="commercial_partner_id" />
                 <filter
