@@ -560,15 +560,19 @@
                                     <field name="notify_certificate_date_due"/>
                                 </group>
                                 <group>
-                                    <label for="unsent_invoices"/>
+                                    <label for="number_unsent_invoices"/>
                                     <div class="o_row">
-                                        <field name="unsent_invoices"/>
+                                        <field name="number_unsent_invoices"/>
                                         <button
                                             type="object"
                                             name="action_unsent_invoices"
                                             class="btn-sm btn-link mb4 fa fa-cog"
                                             aria-label="More languages"
                                             title="Consulta de facturas elec. no enviadas"/>
+                                    </div>
+                                    <label for="unsent_invoices"/>
+                                    <div class="o_row">
+                                        <field name="unsent_invoices"/>
                                     </div>
                                 </group>
                             </group>
@@ -646,7 +650,7 @@
                 <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
                 <field name="website" widget="url" optional="show"/>
-                <field name="unsent_invoices" optional="show"/>
+                <field name="number_unsent_invoices" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="amount_total"/>
                 <field name="comission"/>

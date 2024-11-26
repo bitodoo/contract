@@ -203,6 +203,7 @@ class ContractContract(models.Model):
     notify_certificate_date_due = fields.Date(
         string="Notificación F. venc.", help="Notificación antes de la fecha de vencimiento del certificado (SUNAT)")
     unsent_invoices = fields.Text(string='Facturas no enviadas')
+    number_unsent_invoices = fields.Text(string='# Facturas no enviadas')
 
     @api.onchange('server_id')
     def onchange_server_id(self):
@@ -891,28 +892,49 @@ class ContractContract(models.Model):
                             ('invoice_date', '<', one_day_ago_str),
                         ]], {'fields': ['name']})
                         print(invoices)
-                        contract.unsent_invoices = "# %s" % len(invoices)
+                        contract.number_unsent_invoices = "# %s" % len(invoices)
+                        contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
-            else:
-                if contract.version == '17':
-                    if contract.server_id.ConnectClient():
-                        models, db, uid, password = contract.server_id.ConnectClient()
-                        try:
-                            # Consulta
-                            invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
-                                ('state', '=', 'posted'),
-                                ('pe_sunat_status', '=', 'noaceptado'),
-                                ('pe_is_cpe', '=', True),
-                                ('invoice_date', '>=', two_months_ago_str),
-                                '|',  # Comienza la condición OR
-                                '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
-                                ('journal_id.l10n_latam_document_type_id.code', '=', '03'),
-                                ('invoice_date', '<', three_days_ago_str),
-                                '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
-                                ('journal_id.l10n_latam_document_type_id.code', 'in', ['01', '07', '08']),
-                                ('invoice_date', '<', one_day_ago_str),
-                            ]], {'fields': ['name']})
-                            contract.unsent_invoices = "# %s" % len(invoices)
-                        except xmlrpc.client.Fault as e:
-                            logging.exception("xmlrpc.client.Fault occurred: %s", e)
+            elif contract.version == '17':
+                if contract.server_id.ConnectClient():
+                    models, db, uid, password = contract.server_id.ConnectClient()
+                    try:
+                        invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
+                            ('state', '=', 'posted'),
+                            ('pe_sunat_status', '=', 'noaceptado'),
+                            ('pe_is_cpe', '=', True),
+                            ('invoice_date', '>=', two_months_ago_str),
+                            '|',  # Comienza la condición OR
+                            '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
+                            ('journal_id.l10n_latam_document_type_id.code', '=', '03'),
+                            ('invoice_date', '<', three_days_ago_str),
+                            '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
+                            ('journal_id.l10n_latam_document_type_id.code', 'in', ['01', '07', '08']),
+                            ('invoice_date', '<', one_day_ago_str),
+                        ]], {'fields': ['name']})
+                        contract.number_unsent_invoices = "# %s" % len(invoices)
+                        contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
+                    except xmlrpc.client.Fault as e:
+                        logging.exception("xmlrpc.client.Fault occurred: %s", e)
+            elif contract.version == '11':
+                if contract.server_id.ConnectClient():
+                    models, db, uid, password = contract.server_id.ConnectClient()
+                    try:
+                        invoices = models.execute_kw(db, uid, password, 'account.invoice', 'search_read', [[
+                            ('state', 'in', ['paid', 'open']),
+                            ('journal_id.is_cpe', '=', True),
+                            ('pe_cpe_id.response', 'not like', '0000%'),
+                            ('date', '>=', two_months_ago_str),
+                            '|',  # Comienza la condición OR
+                            '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
+                            ('journal_id.pe_invoice_code', '=', '03'),
+                            ('date', '<', three_days_ago_str),
+                            '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
+                            ('journal_id.pe_invoice_code', 'in', ['01', '07', '08']),
+                            ('date', '<', one_day_ago_str),
+                        ]], {'fields': ['move_name']})
+                        contract.number_unsent_invoices = "# %s" % len(invoices)
+                        contract.unsent_invoices = ", ".join([i['move_name'] for i in invoices])
+                    except xmlrpc.client.Fault as e:
+                        logging.exception("xmlrpc.client.Fault occurred: %s", e)
