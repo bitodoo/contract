@@ -9,6 +9,14 @@
         <field name="state">code</field>
         <field name="code">action = records.action_unsent_invoices()</field>
     </record>
+    <record id="ir_actions_server_action_client_company" model="ir.actions.server">
+        <field name="name">CONSULTA FECHA DE EXPIRACIÓN CERT.</field>
+        <field name="model_id" ref="contract.model_contract_contract" />
+        <field name="binding_model_id" ref="contract.model_contract_contract" />
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_client_company()</field>
+    </record>
 
     <!--Main FORM view-->
     <record id="contract_contract_form_view" model="ir.ui.view">
@@ -126,6 +134,9 @@
                             />
                             <field
                                 name="server_id"
+                            />
+                            <field
+                                name="version" invisible="1"
                             />
                             <field
                                 name="website"
@@ -556,10 +567,6 @@
                         <page string="Facturación Electrónica">
                             <group>
                                 <group>
-                                    <field name="certificate_date_due"/>
-                                    <field name="notify_certificate_date_due"/>
-                                </group>
-                                <group>
                                     <label for="number_unsent_invoices"/>
                                     <div class="o_row">
                                         <field name="number_unsent_invoices"/>
@@ -574,6 +581,19 @@
                                     <div class="o_row">
                                         <field name="unsent_invoices"/>
                                     </div>
+                                </group>
+                                <group invisible="version != '17'">
+                                    <label for="certificate_date_due"/>
+                                    <div class="o_row">
+                                        <field name="certificate_date_due"/>
+                                        <button
+                                            type="object"
+                                            name="action_client_company"
+                                            class="btn-sm btn-link mb4 fa fa-cog"
+                                            aria-label="More languages"
+                                            title="Consulta fecha de expiración certificado digital (SUNAT)"/>
+                                    </div>
+                                    <field name="notify_certificate_date_due"/>
                                 </group>
                             </group>
                         </page>

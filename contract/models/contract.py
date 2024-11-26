@@ -199,7 +199,7 @@ class ContractContract(models.Model):
         'res.partner', string='Contactos',
         help="Contactos a los que se enviará el mensaje de whatsapp")
     certificate_date_due = fields.Date(
-        string="F. venc.", help="Fecha de vencimiento del certificado (SUNAT)")
+        string="F. venc.", help="Fecha de venc. del certificado (SUNAT) ahora solo disponible para 17.0")
     notify_certificate_date_due = fields.Date(
         string="Notificación F. venc.", help="Notificación antes de la fecha de vencimiento del certificado (SUNAT)")
     unsent_invoices = fields.Text(string='Facturas no enviadas')
@@ -936,5 +936,24 @@ class ContractContract(models.Model):
                         ]], {'fields': ['move_name']})
                         contract.number_unsent_invoices = "# %s" % len(invoices)
                         contract.unsent_invoices = ", ".join([i['move_name'] for i in invoices])
+                    except xmlrpc.client.Fault as e:
+                        logging.exception("xmlrpc.client.Fault occurred: %s", e)
+
+    def action_client_company(self):
+        for contract in self:
+            _logger.info("=" * 40)
+            _logger.info(contract.name)
+            _logger.info(contract.server_id.name)
+            _logger.info("=" * 40)
+            if contract.version == '17':
+                if contract.server_id.ConnectClient():
+                    models, db, uid, password = contract.server_id.ConnectClient()
+                    try:
+                        company = models.execute_kw(db, uid, password, 'res.company', 'search_read', [[
+                            ('pe_cert_date_end', '!=', False),
+                        ]], {'fields': ['pe_cert_date_end'], 'limit': 1})
+                        print(company)
+                        if company:
+                            contract.certificate_date_due = company[0]['pe_cert_date_end']
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
