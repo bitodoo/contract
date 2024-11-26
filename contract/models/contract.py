@@ -9,6 +9,7 @@
 from markupsafe import Markup
 from datetime import datetime, timedelta
 import logging
+from dateutil.relativedelta import relativedelta
 
 from odoo import Command, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -955,5 +956,6 @@ class ContractContract(models.Model):
                         print(company)
                         if company:
                             contract.certificate_date_due = company[0]['pe_cert_date_end']
+                            contract.notify_certificate_date_due = contract.certificate_date_due - relativedelta(months=1)
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
