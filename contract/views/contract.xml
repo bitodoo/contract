@@ -672,9 +672,10 @@
                 <field name="website" widget="url" optional="show"/>
                 <field name="number_unsent_invoices" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
-                <field name="amount_total"/>
-                <field name="comission"/>
-                <field name="utility"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount_total" widget="monetary" sum="Total"/>
+                <field name="comission" widget="monetary" sum="Total Comisión"/>
+                <field name="utility" widget="monetary" sum="Total Utilidad"/>
                 <field name="recurring_next_date" optional="show"/>
             </tree>
         </field>
