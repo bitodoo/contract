@@ -566,10 +566,10 @@
                         </page>
                         <page string="Facturación Electrónica">
                             <group>
-                                <group string="Facturas no enviadas">
-                                    <label for="sunat_lookback_days"/>
+                                <group>
+                                    <label for="number_unsent_invoices"/>
                                     <div class="o_row">
-                                        <field name="sunat_lookback_days"/>
+                                        <field name="number_unsent_invoices"/>
                                         <button
                                             type="object"
                                             name="action_unsent_invoices"
@@ -577,19 +577,11 @@
                                             aria-label="More languages"
                                             title="Consulta de facturas elec. no enviadas"/>
                                     </div>
-                                    <field name="number_unsent_invoices"/>
                                     <label for="unsent_invoices"/>
                                     <div class="o_row">
                                         <field name="unsent_invoices"/>
                                     </div>
                                 </group>
-                                <group string="Boletas no enviadas">
-                                    <field name="sunat_lookback_days_boleta"/>
-                                    <field name="number_unsent_boletas"/>
-                                    <field name="unsent_boletas"/>
-                                </group>
-                            </group>
-                            <group>
                                 <group invisible="version != '17'">
                                     <label for="certificate_date_due"/>
                                     <div class="o_row">
@@ -660,12 +652,8 @@
         <field name="arch" type="xml">
             <tree decoration-danger="notify_certificate_date_due and notify_certificate_date_due &lt; context_today().strftime('%Y-%m-%d')">
                 <field name="name" string="Name" />
-                <field name="server_id" column_invisible="1"/>
-                <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="user_id" optional="hide"/>
                 <field name="partner_id" />
-                <field name="number_unsent_invoices" optional="show"/>
-                <field name="number_unsent_boletas" optional="show"/>
                 <field name="mobile" optional="hide"/>
                 <field name="certificate_date_due" widget='remaining_days' optional="show"/>
                 <field name="notify_certificate_date_due" optional="hide"/>
@@ -678,8 +666,11 @@
                     options="{'color_field': 'color'}"
                     optional="hide"
                 />
+                <field name="server_id" column_invisible="1"/>
+                <field name="server_active" widget="boolean_toggle" optional="show"/>
                 <field name="version" optional="hide" widget="badge" decoration-info="version == '11'" decoration-success="version == '15'"/>
                 <field name="website" widget="url" optional="show"/>
+                <field name="number_unsent_invoices" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" />
                 <field name="currency_id" column_invisible="1"/>
                 <field name="amount_total" widget="monetary" sum="Total"/>

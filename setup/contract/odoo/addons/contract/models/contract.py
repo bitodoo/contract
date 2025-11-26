@@ -205,11 +205,6 @@ class ContractContract(models.Model):
         string="Notificación F. venc.", help="Notificación antes de la fecha de vencimiento del certificado (SUNAT)")
     unsent_invoices = fields.Text(string='Facturas no enviadas')
     number_unsent_invoices = fields.Text(string='# Facturas no enviadas')
-    sunat_lookback_days = fields.Integer(string="# Días revisión Factura", default=2, help="Número de días hacia atrás desde hoy para consultar facturas no aceptadas por SUNAT - (Si desean del dia actual ubicar 0).")
-    
-    unsent_boletas = fields.Text(string='Boletas no enviadas')
-    number_unsent_boletas = fields.Text(string='# Boletas no enviadas')
-    sunat_lookback_days_boleta = fields.Integer(string="# Días revisión Boleta", default=6, help="Número de días hacia atrás desde hoy para consultar boletas no aceptadas por SUNAT - (Si desean del dia actual ubicar 0).")
 
     @api.onchange('server_id')
     def onchange_server_id(self):
@@ -861,120 +856,87 @@ class ContractContract(models.Model):
 
     def action_unsent_invoices(self):
         # Obtén la fecha actual
-        import pytz
-        tz = pytz.timezone('America/Lima')
-        current_date = datetime.now(tz)
+        current_date = datetime.now()
 
+        # Calcula la fecha que corresponde a dos meses atrás
+        two_months_ago = current_date - timedelta(days=60)
+
+        # Convierte la fecha a string en formato ISO (aaaa-mm-dd) para Odoo
+        two_months_ago_str = two_months_ago.strftime('%Y-%m-%d')
+
+        # Definir las fechas
+        three_days_ago_str = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
+        one_day_ago_str = (current_date - timedelta(days=1)).strftime('%Y-%m-%d')
 
 
         for contract in self:
-
             _logger.info("=" * 40)
             _logger.info(contract.name)
             _logger.info(contract.server_id.name)
             _logger.info("=" * 40)
-            # Calcula la fecha que corresponde a dos meses atrás
-            two_months_ago = current_date - timedelta(days=60)
-
-            # Convierte la fecha a string en formato ISO (aaaa-mm-dd) para Odoo
-            two_months_ago_str = two_months_ago.strftime('%Y-%m-%d')
-
-            # Definir las fechas
-            three_days_ago_str = (current_date - timedelta(days=3)).strftime('%Y-%m-%d')
-            one_day_ago_str = (current_date - timedelta(days=2)).strftime('%Y-%m-%d')
-            lookback_days = (current_date - timedelta(days=contract.sunat_lookback_days or 0)).strftime('%Y-%m-%d')
-            lookback_days_boleta = (current_date - timedelta(days=contract.sunat_lookback_days_boleta or 0)).strftime('%Y-%m-%d')
             invoices = []
             if contract.is_nubefact and contract.version == '15':
                 if contract.server_id.ConnectClient():
                     models, db, uid, password = contract.server_id.ConnectClient()
                     try:
-                        # función auxiliar local para no repetir el dominio
-                        def _fetch_unsent_moves(document_codes, date_from):
-                            return models.execute_kw(
-                                db, uid, password,
-                                'account.move', 'search_read',
-                                [[
-                                    ('state', '=', 'posted'),
-                                    ('l10n_pe_edi_sunat_accepted', '=', False),
-                                    ('l10n_pe_edi_is_einvoice', '=', True),
-                                    ('invoice_date', '>=', date_from),
-                                    ('journal_id.l10n_latam_document_type_id.code', 'in', document_codes),
-                                ]],
-                                {'fields': ['name']}
-                            )
-                        # Facturas: 01, 07, 08
-                        invoices = _fetch_unsent_moves(['01', '07', '08'], lookback_days)
+                        invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
+                            ('state', '=', 'posted'),
+                            ('l10n_pe_edi_ose_accepted', '=', False),
+                            ('l10n_pe_edi_is_einvoice', '=', True),
+                            ('invoice_date', '>=', two_months_ago_str),
+                            '|',  # Comienza la condición OR
+                            '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
+                            ('journal_id.l10n_latam_document_type_id.code', '=', '03'),
+                            ('invoice_date', '<', three_days_ago_str),
+                            '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
+                            ('journal_id.l10n_latam_document_type_id.code', 'in', ['01', '07', '08']),
+                            ('invoice_date', '<', one_day_ago_str),
+                        ]], {'fields': ['name']})
+                        print(invoices)
                         contract.number_unsent_invoices = "# %s" % len(invoices)
-                        contract.unsent_invoices = ", ".join(i['name'] for i in invoices)
-                        # Boletas: 03
-                        boletas = _fetch_unsent_moves(['03'], lookback_days_boleta)
-                        contract.number_unsent_boletas = "# %s" % len(boletas)
-                        contract.unsent_boletas = ", ".join(i['name'] for i in boletas)
-
+                        contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
             elif contract.version == '17':
                 if contract.server_id.ConnectClient():
                     models, db, uid, password = contract.server_id.ConnectClient()
                     try:
-                        # función auxiliar local para no repetir el dominio
-                        def _fetch_unsent_moves(document_codes, date_from):
-                            return models.execute_kw(
-                                db, uid, password,
-                                'account.move', 'search_read',
-                                [[
-                                    ('state', '=', 'posted'),
-                                    ('pe_sunat_status', '=', 'noaceptado'),
-                                    ('pe_is_cpe', '=', True),
-                                    ('invoice_date', '>=', date_from),
-                                    ('journal_id.l10n_latam_document_type_id.code', 'in', document_codes),
-                                ]],
-                                {'fields': ['name']}
-                            )
-                        invoices = _fetch_unsent_moves(['01', '07', '08'], lookback_days)
+                        invoices = models.execute_kw(db, uid, password, 'account.move', 'search_read', [[
+                            ('state', '=', 'posted'),
+                            ('pe_sunat_status', '=', 'noaceptado'),
+                            ('pe_is_cpe', '=', True),
+                            ('invoice_date', '>=', two_months_ago_str),
+                            '|',  # Comienza la condición OR
+                            '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
+                            ('journal_id.l10n_latam_document_type_id.code', '=', '03'),
+                            ('invoice_date', '<', three_days_ago_str),
+                            '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
+                            ('journal_id.l10n_latam_document_type_id.code', 'in', ['01', '07', '08']),
+                            ('invoice_date', '<', one_day_ago_str),
+                        ]], {'fields': ['name']})
                         contract.number_unsent_invoices = "# %s" % len(invoices)
                         contract.unsent_invoices = ", ".join([i['name'] for i in invoices])
-                        boletas = _fetch_unsent_moves(['03'], lookback_days_boleta)
-                        contract.number_unsent_boletas = "# %s" % len(boletas)
-                        contract.unsent_boletas = ", ".join([i['name'] for i in boletas])
-
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
             elif contract.version == '11':
                 if contract.server_id.ConnectClient():
                     models, db, uid, password = contract.server_id.ConnectClient()
                     try:
-                        def _fetch_unsent_moves(document_codes, date_from):
-                            return models.execute_kw(
-                                db, uid, password,
-                                'account.invoice', 'search_read',
-                                [[
-                                    ('state', 'in', ['paid', 'open']),
-                                    ('journal_id.is_cpe', '=', True),
-                                    ('journal_id.pe_invoice_code', 'in', document_codes),
-                                    ('date', '>=', date_from),
-                                ]],
-                                {'fields': ['move_name', 'pe_response']}
-                            )
-                        invoices = _fetch_unsent_moves(['01', '07', '08'], lookback_days)
-                        docs_filtrados_invoices = [
-                            doc for doc in invoices 
-                            if doc.get('pe_response') is None 
-                            or isinstance(doc.get('pe_response'), bool)  # Incluir booleanos
-                            or (isinstance(doc.get('pe_response'), str) and not doc.get('pe_response').startswith('0000'))
-                        ]
-                        contract.number_unsent_invoices = "# %s" % len(docs_filtrados_invoices)
-                        contract.unsent_invoices = ", ".join([i['move_name'] for i in docs_filtrados_invoices])
-                        boletas = _fetch_unsent_moves(['03'], lookback_days_boleta)
-                        docs_filtrados_boletas = [
-                            doc for doc in boletas 
-                            if doc.get('pe_response') is None 
-                            or isinstance(doc.get('pe_response'), bool)  # Incluir booleanos
-                            or (isinstance(doc.get('pe_response'), str) and not doc.get('pe_response').startswith('0000'))
-                        ]
-                        contract.number_unsent_boletas = "# %s" % len(docs_filtrados_boletas)
-                        contract.unsent_boletas = ", ".join([i['move_name'] for i in docs_filtrados_boletas])
+                        invoices = models.execute_kw(db, uid, password, 'account.invoice', 'search_read', [[
+                            ('state', 'in', ['paid', 'open']),
+                            ('journal_id.is_cpe', '=', True),
+                            ('pe_cpe_id.response', 'not like', '0000%'),
+                            ('date', '>=', two_months_ago_str),
+                            '|',  # Comienza la condición OR
+                            '&',  # Primera condición: si es boleta, dentro del rango de dos meses a tres días atrás
+                            ('journal_id.pe_invoice_code', '=', '03'),
+                            ('date', '<', three_days_ago_str),
+                            '&',  # Segunda condición: si es factura, dentro del rango de dos meses a un día atrás
+                            ('journal_id.pe_invoice_code', 'in', ['01', '07', '08']),
+                            ('date', '<', one_day_ago_str),
+                        ]], {'fields': ['move_name']})
+                        contract.number_unsent_invoices = "# %s" % len(invoices)
+                        contract.unsent_invoices = ", ".join([i['move_name'] for i in invoices])
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
 
