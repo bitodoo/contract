@@ -59,10 +59,9 @@ class AccountMove(models.Model):
         MessageWizard = self.env['acrux.chat.message.wizard']
         domain = [
             ('partner_id.mobile', '!=', False),
-            ('state', '=', 'posted'),
+            ('state', '=', 'draft'),
             ('contract_id.send_whatsapp', '=', True),
-            ('invoice_date', '<=', fields.Date.context_today(self)),
-            ('invoice_date_due', '>=', fields.Date.context_today(self)),
+            ('contract_id.active', '=', True),
             ('message_sent_to_whatsapp', '=', False )
         ]
         moves = self.search(domain)
