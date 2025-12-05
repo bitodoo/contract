@@ -146,7 +146,6 @@
                             />
                             <field
                                 name="mobile"
-                                required="1"
                                 readonly="is_terminated"
                             />
                             <field
