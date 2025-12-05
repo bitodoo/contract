@@ -58,7 +58,6 @@ class AccountMove(models.Model):
         print('cron_recurring_send_whatsapp_invoice')
         MessageWizard = self.env['acrux.chat.message.wizard']
         domain = [
-            ('partner_id.mobile', '!=', False),
             ('state', '=', 'draft'),
             ('contract_id.send_whatsapp', '=', True),
             ('contract_id.active', '=', True),
