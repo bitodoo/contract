@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="sunat_sol_bookmarklet_install" name="Instalar Bookmarklet SOL">
+        <html lang="es">
+            <head>
+                <meta charset="utf-8"/>
+                <title>Bookmarklet SOL Auto-Login</title>
+                <style>
+                    body { font-family: -apple-system, system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #2c3e50; line-height: 1.5; }
+                    h1 { color: #1a5fb4; }
+                    h2 { margin-top: 32px; color: #1a5fb4; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
+                    .bookmarklet-link { display: inline-block; padding: 14px 24px; background: #1a5fb4; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; }
+                    .bookmarklet-link:hover { background: #134a8e; }
+                    .step { background: #f6f8fa; padding: 16px 20px; border-left: 4px solid #1a5fb4; margin: 14px 0; border-radius: 4px; }
+                    code { background: #eee; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+                    .warn { background: #fff8e6; border-left-color: #d9a300; }
+                </style>
+            </head>
+            <body>
+                <h1>Bookmarklet SOL Auto-Login</h1>
+                <p>Esta utilidad permite acceder automáticamente al Menú SOL de SUNAT con las credenciales del cliente del contrato. <strong>Solo necesitas instalarlo una vez en tu navegador.</strong></p>
+
+                <h2>1. Arrastra este botón a tu barra de favoritos</h2>
+                <p>Asegúrate primero de tener visible la barra de favoritos del navegador (en Chrome: <code>Ctrl+Shift+B</code>).</p>
+                <p style="margin: 24px 0;">
+                    <a class="bookmarklet-link"
+                       t-att-href="bookmarklet_href"
+                       onclick="alert('No hagas click. Arrastra este botón a tu barra de favoritos.'); return false;">
+                        SOL Auto-Login
+                    </a>
+                </p>
+
+                <h2>2. Cómo usarlo</h2>
+                <div class="step"><strong>a.</strong> En Odoo, abre el contrato del cliente y haz click en el botón <strong>Acceder a SOL</strong>.</div>
+                <div class="step"><strong>b.</strong> Se abrirá una pestaña nueva en SUNAT. Haz click en el botón <strong>Iniciar Sesión</strong> de SUNAT.</div>
+                <div class="step"><strong>c.</strong> Cuando estés en la página de login (<code>loginMenuSol</code>), haz click en el favorito <strong>SOL Auto-Login</strong> que guardaste.</div>
+                <div class="step"><strong>d.</strong> El formulario se rellenará y enviará automáticamente.</div>
+
+                <h2>Notas</h2>
+                <div class="step warn">
+                    <ul>
+                        <li>Si la cuenta tiene <strong>captcha</strong> o <strong>MFA</strong>, el formulario quedará rellenado y solo tendrás que resolver el segundo paso manualmente.</li>
+                        <li>Las credenciales se transportan vía <code>window.name</code> (no quedan en historial ni URL) y el bookmarklet las borra apenas las usa.</li>
+                        <li>Solo funciona si abriste la pestaña SUNAT desde el botón de Odoo.</li>
+                    </ul>
+                </div>
+            </body>
+        </html>
+    </template>
+
+    <record id="action_sunat_sol_bookmarklet_install" model="ir.actions.act_url">
+        <field name="name">Instalar Bookmarklet SOL</field>
+        <field name="url">/contract/sunat_sol/install</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

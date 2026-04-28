@@ -1,6 +1,8 @@
 # Copyright 2020-2022 Tecnativa - Víctor Martínez
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
+from html import escape
+
 from odoo import _, http
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
@@ -104,3 +106,72 @@ class PortalContract(CustomerPortal):
             return request.redirect("/my")
         values = self._contract_get_page_view_values(contract_sudo, access_token, **kw)
         return request.render("contract.portal_contract_page", values)
+
+    @http.route(
+        ["/contract/sunat_sol/install"],
+        type="http",
+        auth="user",
+        website=False,
+    )
+    def sunat_sol_bookmarklet_install(self, **kw):
+        bookmarklet = (
+            "javascript:(function(){try{"
+            "var raw=window.name;"
+            "if(!raw){alert('No hay credenciales en window.name. Abre SUNAT desde el botón de Odoo.');return;}"
+            "var d=JSON.parse(raw);"
+            "if(!d.kaypi_sol){alert('Formato no reconocido en window.name.');return;}"
+            "var c=d.kaypi_sol;"
+            "var setById=function(id,v){var e=document.getElementById(id);"
+            "if(e){e.value=v;"
+            "e.dispatchEvent(new Event('input',{bubbles:true}));"
+            "e.dispatchEvent(new Event('change',{bubbles:true}));"
+            "e.dispatchEvent(new Event('keyup',{bubbles:true}));}};"
+            "var btnRuc=document.getElementById('btnPorRuc');"
+            "if(btnRuc){try{btnRuc.click();}catch(e){}}"
+            "setById('txtRuc',c.ruc);"
+            "setById('txtUsuario',c.user);"
+            "setById('txtContrasena',c.pass);"
+            "window.name='';"
+            "setTimeout(function(){"
+            "var btn=document.getElementById('btnAceptar');"
+            "if(btn){btn.click();}else{alert('No se encontró botón btnAceptar.');}"
+            "},150);"
+            "}catch(e){alert('Error rellenando: '+e.message);}})();"
+        )
+        href_attr = escape(bookmarklet, quote=True)
+        html = (
+            "<!DOCTYPE html>\n"
+            "<html lang=\"es\"><head><meta charset=\"utf-8\"/>"
+            "<title>Bookmarklet SOL Auto-Login</title>"
+            "<style>"
+            "body{font-family:-apple-system,system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#2c3e50;line-height:1.5}"
+            "h1,h2{color:#1a5fb4}"
+            "h2{margin-top:32px;border-bottom:1px solid #e0e0e0;padding-bottom:6px}"
+            ".bookmarklet-link{display:inline-block;padding:14px 24px;background:#1a5fb4;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:16px}"
+            ".bookmarklet-link:hover{background:#134a8e}"
+            ".step{background:#f6f8fa;padding:16px 20px;border-left:4px solid #1a5fb4;margin:14px 0;border-radius:4px}"
+            "code{background:#eee;padding:2px 6px;border-radius:3px;font-size:13px}"
+            ".warn{background:#fff8e6;border-left-color:#d9a300}"
+            "</style></head><body>"
+            "<h1>Bookmarklet SOL Auto-Login</h1>"
+            "<p>Esta utilidad permite acceder automáticamente al Menú SOL de SUNAT con las credenciales del cliente. <strong>Solo lo instalas una vez.</strong></p>"
+            "<h2>1. Arrastra este botón a tu barra de favoritos</h2>"
+            "<p>Asegúrate de tener visible la barra de favoritos (en Chrome: <code>Ctrl+Shift+B</code>).</p>"
+            "<p style=\"margin:24px 0\">"
+            f"<a class=\"bookmarklet-link\" href=\"{href_attr}\" "
+            "onclick=\"alert('No hagas click. Arrastra este botón a tu barra de favoritos.'); return false;\">"
+            "SOL Auto-Login</a></p>"
+            "<h2>2. Cómo usarlo</h2>"
+            "<div class=\"step\"><strong>a.</strong> En Odoo, abre un servicio o contrato y haz click en <strong>Acceder a SOL</strong>.</div>"
+            "<div class=\"step\"><strong>b.</strong> Se abrirá el form de login de SUNAT con campos RUC / Usuario / Contraseña.</div>"
+            "<div class=\"step\"><strong>c.</strong> Haz click en el favorito <strong>SOL Auto-Login</strong> que guardaste.</div>"
+            "<div class=\"step\"><strong>d.</strong> El formulario se rellenará y enviará automáticamente.</div>"
+            "<h2>Notas</h2>"
+            "<div class=\"step warn\"><ul>"
+            "<li>Si la cuenta tiene <strong>captcha</strong> o <strong>MFA</strong>, el form quedará rellenado y solo tendrás que completar el segundo paso.</li>"
+            "<li>Las credenciales viajan vía <code>window.name</code> (no quedan en historial). El bookmarklet las borra al usarlas.</li>"
+            "<li>Solo funciona si abriste la pestaña SUNAT desde el botón de Odoo.</li>"
+            "</ul></div>"
+            "</body></html>"
+        )
+        return request.make_response(html, headers=[('Content-Type', 'text/html; charset=utf-8')])

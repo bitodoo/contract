@@ -997,3 +997,9 @@ class ContractContract(models.Model):
                             contract.notify_certificate_date_due = contract.certificate_date_due - relativedelta(months=1)
                     except xmlrpc.client.Fault as e:
                         logging.exception("xmlrpc.client.Fault occurred: %s", e)
+
+    def action_open_sunat_sol(self):
+        self.ensure_one()
+        if not self.server_id:
+            raise UserError(_("Este contrato no tiene servidor configurado."))
+        return self.server_id.action_open_sunat_sol()

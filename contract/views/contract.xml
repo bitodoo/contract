@@ -88,6 +88,9 @@
                     <button type="object" string="Cerrar Sesión" name="trigger_background_logout" invisible="not server_id"/>
                     <button type="object" string="On" name="action_server_active" invisible="not server_id or server_active"/>
                     <button type="object" string="Off" name="action_server_active" invisible="not server_id or not server_active"/>
+                    <button type="object" string="Acceder a SOL" name="action_open_sunat_sol"
+                            class="btn-primary"
+                            invisible="not server_id or version not in ('11','17')"/>
                 </header>
                 <sheet string="Contract">
                     <field name="active" invisible="1" />

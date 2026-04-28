@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <menuitem
+        id="menu_sunat_sol_bookmarklet_install"
+        name="Instalar Bookmarklet SOL"
+        action="action_sunat_sol_bookmarklet_install"
+        parent="menu_config_contract"
+        sequence="50"
+    />
+</odoo>

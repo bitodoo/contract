@@ -1,3 +1,4 @@
+import re
 import xmlrpc.client
 import time
 from ast import literal_eval
@@ -132,4 +133,89 @@ class KaServer(models.Model):
             return models, db, uid, password
         except ConnectionRefusedError as e:
             _logger.error("ConnectionRefusedError occurred: [Errno 111] Conexión rehusada a %s", self.website)
+
+    def _detect_cpe_server_model(self, rmodels, db, uid, password):
+        # Detecta el modelo remoto referenciado por res.company.pe_cpe_server_id (v11)
+        field_def = rmodels.execute_kw(
+            db, uid, password,
+            'ir.model.fields', 'search_read',
+            [[('model', '=', 'res.company'), ('name', '=', 'pe_cpe_server_id')]],
+            {'fields': ['relation'], 'limit': 1},
+        )
+        if not field_def or not field_def[0].get('relation'):
+            raise UserError(_("No se pudo detectar el modelo remoto de pe_cpe_server_id."))
+        return field_def[0]['relation']
+
+    def action_open_sunat_sol(self):
+        self.ensure_one()
+        if self.version not in ('11', '17'):
+            raise UserError(_("Auto-login SOL solo está soportado para versiones 11 y 17."))
+
+        conn = self.ConnectClient()
+        if not conn:
+            raise UserError(_("No se pudo conectar al servidor del cliente."))
+        rmodels, db, uid, password = conn
+
+        ruc = sol_user = sol_pass = ''
+        try:
+            if self.version == '17':
+                company = rmodels.execute_kw(
+                    db, uid, password,
+                    'res.company', 'read',
+                    [[1]],
+                    {'fields': ['vat', 'pe_ws_user', 'pe_ws_password']},
+                )
+                if not company:
+                    raise UserError(_("No se encontró la compañía 1 en el servidor remoto."))
+                ruc = company[0].get('vat') or ''
+                sol_user = company[0].get('pe_ws_user') or ''
+                sol_pass = company[0].get('pe_ws_password') or ''
+            else:  # version == '11'
+                company = rmodels.execute_kw(
+                    db, uid, password,
+                    'res.company', 'read',
+                    [[1]],
+                    {'fields': ['vat', 'pe_cpe_server_id']},
+                )
+                if not company:
+                    raise UserError(_("No se encontró la compañía 1 en el servidor remoto."))
+                ruc = company[0].get('vat') or ''
+                cpe_ref = company[0].get('pe_cpe_server_id')
+                if not cpe_ref:
+                    raise UserError(_("La compañía remota no tiene 'pe_cpe_server_id' configurado."))
+                cpe_id = cpe_ref[0] if isinstance(cpe_ref, (list, tuple)) else cpe_ref
+                cpe_model = self._detect_cpe_server_model(rmodels, db, uid, password)
+                cpe = rmodels.execute_kw(
+                    db, uid, password,
+                    cpe_model, 'read',
+                    [[cpe_id]],
+                    {'fields': ['user', 'password']},
+                )
+                if not cpe:
+                    raise UserError(_("No se pudo leer las credenciales del servidor CPE remoto."))
+                sol_user = cpe[0].get('user') or ''
+                sol_pass = cpe[0].get('password') or ''
+        except xmlrpc.client.Fault as e:
+            _logger.exception("xmlrpc Fault al leer credenciales SOL: %s", e)
+            raise UserError(_("Error XMLRPC al leer credenciales del cliente: %s") % e)
+
+        # Normalizar RUC: extraer los 11 dígitos (en v11 el vat viene como "PER10430268436")
+        if ruc:
+            m = re.search(r'\d{11}', ruc)
+            if m:
+                ruc = m.group(0)
+
+        if not (ruc and sol_user and sol_pass):
+            raise UserError(_(
+                "Faltan credenciales en el cliente remoto.\nRUC: %s\nUsuario: %s\nClave: %s"
+            ) % (ruc or '(vacío)', sol_user or '(vacío)', '***' if sol_pass else '(vacío)'))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'kaypi_sunat_sol_open',
+            'params': {
+                'sunat_url': 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm',
+                'creds': {'ruc': ruc, 'user': sol_user, 'pass': sol_pass},
+            },
+        }
 
