@@ -17,6 +17,7 @@ class AccountMove(models.Model):
     comission = fields.Monetary(
         string='Comisión',
         related="contract_id.comission",
+        store=True,
         tracking=4,
         readonly=True
     )

@@ -38,8 +38,8 @@
         <field name="inherit_id" ref="account.view_out_invoice_tree" />
         <field name="arch" type="xml">
             <xpath expr="//tree[1]/field[@name='amount_total_signed']" position="after">
-                <field name="comission" optional="show" />
-                <field name="utility" optional="show"/>
+                <field name="comission" widget="monetary" sum="Total Comisión" optional="show" />
+                <field name="utility" widget="monetary" sum="Total Utilidad" optional="show"/>
             </xpath>
              <xpath expr="//tree[1]/field[@name='invoice_user_id']" position="attributes">
                <attribute name="optional">show</attribute>
